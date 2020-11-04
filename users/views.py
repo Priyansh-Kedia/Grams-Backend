@@ -24,13 +24,15 @@ def generate_otp(request):
         try:
             user_profile = Profile.objects.get(phone_number=phone_number)
         except Profile.DoesNotExist:
+            user_profile = Profile.objects.create()
             pass
 
         if user_profile:
             user_profile.otp = otp
             user_profile.save()
             print (otp)
-            return Response({'success':'OTP Generated Successfully!'},status=status.HTTP_200_OK)
+            data = {'success':'OTP Generated Successfully!','OTP': otp}
+            return Response(data, status=status.HTTP_200_OK)
         else:
             return Response({'error':'User Does Not Exist'},status=status.HTTP_400_BAD_REQUEST)
 

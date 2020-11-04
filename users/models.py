@@ -16,11 +16,11 @@ class Profile(models.Model):
     designation = models.CharField(max_length = 100,null = True, blank = True)
     email_id = models.EmailField(null = True,blank = True)
     is_agreed = models.BooleanField(default = False, help_text = "Please Tick If you agree to the Terms and Conditions of the Contract",null = True,blank = True)
-    otp = models.IntegerField(validators = [otp_regex])
+    otp = models.IntegerField(validators = [otp_regex], null = True, blank = True)
     otp_timestamp = models.DateTimeField(auto_now = True)
 
     def __str__(self):
-        return self.name
+        return str(self.phone_number)
 
     class Meta:
         verbose_name_plural = "Profiles"
