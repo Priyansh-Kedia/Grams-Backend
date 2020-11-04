@@ -40,6 +40,8 @@ INSTALLED_APPS = [
 
     # local apps
     'users.apps.UsersConfig',
+
+    # api
     'rest_framework',
 ]
 
