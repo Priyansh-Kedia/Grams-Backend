@@ -22,6 +22,9 @@ class Profile(models.Model):
     def __str__(self):
         return self.name
 
+    class Meta:
+        verbose_name_plural = "Profiles"
+
 
 class Address(models.Model):
     #profile=models.ForeignKey(Profile,on_delete=models.CASCADE)
@@ -34,5 +37,7 @@ class Address(models.Model):
     def __str__(self):
         return self.address
 
+    class Meta:
+        verbose_name_plural = "Addresses"
 
 # Create your models here.
