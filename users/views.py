@@ -24,8 +24,8 @@ def generate_otp(request):
         try:
             user_profile = Profile.objects.get(phone_number=phone_number)
         except Profile.DoesNotExist:
-            user_profile = Profile.objects.create()
-            pass
+            user_profile = Profile.objects.create(phone_number=phone_number)
+            
 
         if user_profile:
             user_profile.otp = otp
