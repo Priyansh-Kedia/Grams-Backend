@@ -9,13 +9,12 @@ from django.utils import timezone
 class Profile(models.Model):
 
     otp_regex = RegexValidator(regex = r'^\d{4}')
-    phone_regex = RegexValidator(regex = r'^\+?1?\d{4,15}$', message = "Phone number must be entered in the format: '+999999999'. Up to 15 digits allowed.")
     company_name = models.CharField(max_length = 200, verbose_name = "Company Name",null = True, blank = True)
-    contact_person_details = models.CharField(max_length = 17, validators = [phone_regex], verbose_name = 'Phone No.', null = True, blank = True)
+    phone_number = models.CharField(max_length = 17 , verbose_name = 'Phone No.', null = True, blank = True)
     name = models.CharField(max_length = 200, null = True, blank = True)
     designation = models.CharField(max_length = 100,null = True, blank = True)
     email_id = models.EmailField(null = True,blank = True)
-    i_agree = models.BooleanField(default = False, help_text = "Please Tick If you agree to the Terms and Conditions of the Contract",null = True,blank = True)
+    is_agreed = models.BooleanField(default = False, help_text = "Please Tick If you agree to the Terms and Conditions of the Contract",null = True,blank = True)
     otp = models.IntegerField(validators = [otp_regex])
     otp_timestamp = models.DateTimeField(auto_now = True)
 
