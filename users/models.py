@@ -6,7 +6,7 @@ otp_regex = RegexValidator(regex = r'^\d{4}')
 
 class Profile(models.Model):
     company_name = models.CharField(max_length = 200, verbose_name = "Company Name", null = True, blank = True)
-    phone_number = models.CharField(max_length = 17, validators = [phone_regex], verbose_name = 'Phone No.', null = True, blank = True)
+    phone_number = models.CharField(max_length = 17, validators = [phone_regex], verbose_name = 'Phone No.', unique = True)
     name = models.CharField(max_length = 200, null = True, blank = True)
     designation = models.CharField(max_length = 100, null = True, blank = True)
     email_id = models.EmailField(null = True, blank = True)
@@ -21,7 +21,7 @@ class Profile(models.Model):
         verbose_name_plural = "Profiles"
 
 class Address(models.Model):
-    profile = models.ForeignKey(to = Profile, on_delete = models.CASCADE, null = True, blank = True)
+    profile = models.ForeignKey(to = Profile, on_delete = models.CASCADE)
     address = models.CharField(max_length = 100, null = True, blank = True)
     city = models.CharField(max_length = 100, null = True, blank = True)
     state = models.CharField(max_length = 100, null = True, blank = True)
