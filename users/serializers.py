@@ -7,10 +7,11 @@ class OTPSerializer(serializers.Serializer):
     phone_regex = RegexValidator(regex = r'^\+\d{4,15}$', message = "Phone number must be entered in the format: '+999999999'. Up to 15 digits allowed.")
     phone_number = serializers.CharField(max_length = 17, validators = [phone_regex])
 
-class AddressSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Address
-        fields = ['address', 'city', 'state', 'country', 'profile']
+class AddressSerializer(serializers.Serializer):
+    address = serializers.CharField(max_length = 100, required = False)
+    city = serializers.CharField(max_length = 100, required = False)
+    state = serializers.CharField(max_length = 100, required = False)
+    country = serializers.CharField(max_length = 100, required = False)
 
     def create(self):
         address = Address(
@@ -22,10 +23,27 @@ class AddressSerializer(serializers.ModelSerializer):
         )
         address.save()
 
+    def update(self, instance):
+        instance.address = self.validated_data.get('address', instance.address)
+        instance.city = self.validated_data.get('city', instance.city)
+        instance.state = self.validated_data.get('state', instance.state)
+        instance.country = self.validated_data.get('country', instance.country)
+        instance.save()
+        #return instance
+
 class ProfileSerializer(serializers.Serializer):
     phone_regex = RegexValidator(regex = r'^\+\d{4,15}$', message = "Phone number must be entered in the format: '+999999999'. Up to 15 digits allowed.")
     phone_number = serializers.CharField(max_length = 17, validators = [phone_regex])
     company_name = serializers.CharField(max_length = 100, required = False)
     name = serializers.CharField(max_length = 100, required = False)
     designation = serializers.CharField(max_length = 100, required = False)
-    email_id = serializers.CharField(max_length = 100, required = False)
+    email_id = serializers.EmailField(max_length = 100, required = False)
+
+    def update(self, instance):
+        phone_number = self.validated_data.get('phone_number')
+        instance.phone_number = self.validated_data.get('phone_number', instance.phone_number)
+        instance.company_name = self.validated_data.get('company_name', instance.company_name)
+        instance.name = self.validated_data.get('name', instance.name)
+        instance.designation = self.validated_data.get('designation', instance.designation)
+        instance.email_id = self.validated_data.get('email_id', instance.email_id)
+        instance.save()

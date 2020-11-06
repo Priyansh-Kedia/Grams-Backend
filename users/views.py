@@ -86,52 +86,49 @@ def add_address(request):
         address_serializer.create()
         return Response({'success':'Address saved successfully!','address':address_serializer.data})
 
-@api_view(['PUT'],)
-def update(request):
+@api_view(['PUT',])
+def update_address(request):
     if request.method == "PUT":
-        address_id = request.POST.get('address_id')
-        profile_serializer = ProfileSerializer(data = request.data)
-        if not profile_serializer.is_valid():
-            return Response(profile_serializer.errors,status = status.HTTP_422_UNPROCESSABLE_ENTITY)
+        address_id = request.POST.get('address_id', None)
+
+        if address_id is None:
+            return Response({'error':'Address id not found!'}, status = status.HTTP_404_NOT_FOUND)
 
         try:
             address_obj = Address.objects.get(pk = address_id)
         except Address.DoesNotExist:
-            return Response({'error':'Address not found!'}, status = status.HTTP_404_NOT_FOUND)
+            return Response({'error':'Address does not exist'}, status = status.HTTP_404_NOT_FOUND)
 
-        profile_obj = address_obj.profile
+        profile_obj =address_obj.profile
         data = request.data.dict()
         data['profile'] = profile_obj.pk
         address_serializer = AddressSerializer(data = data)
-
         if not address_serializer.is_valid():
             return Response({'error':address_serializer.errors}, status = status.HTTP_422_UNPROCESSABLE_ENTITY)
 
-        address = request.POST.get('address', address_obj.address)
-        city = request.POST.get('city', address_obj.city)
-        state = request.POST.get('state', address_obj.state)
-        country = request.POST.get('country', address_obj.country)
-        name = request.POST.get('name', profile_obj.name)
-        phone_number = request.POST.get('phone_number', profile_obj.phone_number)
-        company_name = request.POST.get('company_name', profile_obj.company_name)
-        designation = request.POST.get('designation', profile_obj.designation)
-        email_id = request.POST.get('email_id', profile_obj.email_id)
+        address_serializer.update(instance = address_obj)
+        return Response({'success':'Address updated successfully!','address':address_serializer.data}, status = status.HTTP_200_OK)
 
-        address_obj.city = city
-        address_obj.country = country
-        address_obj.state = state
-        address_obj.address = address
-        profile_obj.name = name
-        profile_obj.phone_number = phone_number
-        profile_obj.company_name = company_name
-        profile_obj.designation = designation
-        profile_obj.email_id = email_id
+@api_view(['PUT',])
+def update_profile(request):
+    if request.method == "PUT":
+        phone_number = request.POST.get('phone_number',None)
 
-        profile_obj.save()
-        address_obj.save()
-        #data = {'sucess':'Fields Updated Successfully!', 'company_name':company_name, 'city':city, 'name':name, 'phone_number':phone_number, 'address':address, 'email_id':email_id}
-        data = {'success':'Fields updated successfully!','address':address_serializer.data}
-        return Response(data)
+        if phone_number is None:
+            return Response({'error':'Phone number not provided!'}, status = status.HTTP_400_BAD_REQUEST)
+
+        try :
+            profile_obj = Profile.objects.get(phone_number = phone_number)
+        except Profile.DoesNotExist:
+            return Response({'error':'Profile does not exist!'}, status = status.HTTP_404_NOT_FOUND)
+
+        profile_serializer = ProfileSerializer(data = request.data)
+
+        if not profile_serializer.is_valid():
+            return Response({'error':profile_serializer.errors}, status = status.HTTP_422_UNPROCESSABLE_ENTITY)
+
+        profile_serializer.update(instance = profile_obj)
+        return Response({'success':'Profile updated successfully!','profile':profile_serializer.data}, status = status.HTTP_200_OK)
 
 @api_view(['POST',])
 def retrieve_address(request):
@@ -141,7 +138,7 @@ def retrieve_address(request):
         if phone_number is None:
             return Response({'error':'Phone number not provided!'}, status = status.HTTP_400_BAD_REQUEST)
 
-        otp_serializer = OTPSerializer(data = request.data)
+        otp_serializer = OTPSerializer(data = data)
 
         if not otp_serializer.is_valid():
             return Response({'error':'Validation error!'},status = status.HTTP_404_NOT_FOUND)
