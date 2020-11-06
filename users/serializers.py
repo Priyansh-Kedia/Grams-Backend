@@ -15,11 +15,11 @@ class AddressSerializer(serializers.ModelSerializer):
 
     def create(self):
         address = Address(
-            profile = self.validated_data["address"]["profile"],
-            address = self.validated_data["address"]["address"],
-            city = self.validated_data["address"]["city"],
-            state = self.validated_data["address"]["state"],
-            country = self.validated_data["address"]["country"],
+            profile = self.validated_data["profile"],
+            address = self.validated_data["address"],
+            city = self.validated_data["city"],
+            state = self.validated_data["state"],
+            country = self.validated_data["country"],
         )
         address.save()
 
