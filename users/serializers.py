@@ -7,11 +7,15 @@ class OTPSerializer(serializers.Serializer):
     phone_regex = RegexValidator(regex = r'^\+\d{4,15}$', message = "Phone number must be entered in the format: '+999999999'. Up to 15 digits allowed.")
     phone_number = serializers.CharField(max_length = 17, validators = [phone_regex])
 
-class AddressSerializer(serializers.Serializer):
-    address = serializers.CharField(max_length = 100, required = False)
-    city = serializers.CharField(max_length = 100, required = False)
-    state = serializers.CharField(max_length = 100, required = False)
-    country = serializers.CharField(max_length = 100, required = False)
+class AddressSerializer(serializers.ModelSerializer):
+    #address = serializers.CharField(max_length = 100, required = False)
+    #city = serializers.CharField(max_length = 100, required = False)
+    #state = serializers.CharField(max_length = 100, required = False)
+    #country = serializers.CharField(max_length = 100, required = False)
+
+    class Meta:
+        model = Address
+        fields = '__all__'
 
     def create(self):
         address = Address(
@@ -29,7 +33,7 @@ class AddressSerializer(serializers.Serializer):
         instance.state = self.validated_data.get('state', instance.state)
         instance.country = self.validated_data.get('country', instance.country)
         instance.save()
-        #return instance
+        return instance
 
 class ProfileSerializer(serializers.Serializer):
     phone_regex = RegexValidator(regex = r'^\+\d{4,15}$', message = "Phone number must be entered in the format: '+999999999'. Up to 15 digits allowed.")
@@ -47,3 +51,4 @@ class ProfileSerializer(serializers.Serializer):
         instance.designation = self.validated_data.get('designation', instance.designation)
         instance.email_id = self.validated_data.get('email_id', instance.email_id)
         instance.save()
+        return instance

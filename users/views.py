@@ -6,9 +6,13 @@ from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from django.utils import timezone
 import random
+from django.forms.models import model_to_dict
+
 
 from .serializers import OTPSerializer,AddressSerializer,ProfileSerializer
 from .models import Profile, Address
+from . import Constants
+
 
 @api_view(['POST',])
 def generate_otp(request):
@@ -19,7 +23,7 @@ def generate_otp(request):
         serializer = OTPSerializer(data = request.data)
         print(request.data)
         if not serializer.is_valid():
-            return Response({'error':'Phone Number Validation Error!'}, status = status.HTTP_422_UNPROCESSABLE_ENTITY)
+            return Response({Constants.ERROR:'Phone Number Validation Error!', Constants.PHONE_NUMBER:phone_number}, status = status.HTTP_422_UNPROCESSABLE_ENTITY)
 
         try:
             user_profile = Profile.objects.get(phone_number = phone_number)
@@ -29,10 +33,10 @@ def generate_otp(request):
         if user_profile:
             user_profile.otp = otp
             user_profile.save()
-            data = {'success':'OTP Generated Successfully!', 'OTP':otp}
+            data = {Constants.SUCCESS:'OTP Generated Successfully!', 'OTP':otp, Constants.PROFILE:model_to_dict(user_profile)}#add profile also
             return Response(data, status = status.HTTP_200_OK)
         else:
-            return Response({'error':'User Does Not Exist'}, status = status.HTTP_404_NOT_FOUND)
+            return Response({Constants.ERROR:'User Does Not Exist'}, status = status.HTTP_404_NOT_FOUND)
 
 @api_view(['POST',])
 def verify_otp(request):
@@ -42,24 +46,24 @@ def verify_otp(request):
         serializer = OTPSerializer(data=request.data)
 
         if not serializer.is_valid():
-            return Response({'error':'Phone Number Not Validated!'}, status = status.HTTP_422_UNPROCESSABLE_ENTITY)
+            return Response({Constants.ERROR:'Phone Number Not Validated!',Constants.PHONE_NUMBER:phone_number}, status = status.HTTP_422_UNPROCESSABLE_ENTITY)
 
         user_profile = None
 
         try:
             user_profile = Profile.objects.get(phone_number = phone_number)
         except Profile.DoesNotExist:
-            return Response({'error':'Please Generate OTP First!'})
+            return Response({Constants.ERROR:'Please Generate OTP First!'})
 
         if user_profile:
             if otp == str(user_profile.otp) :
                 if (timezone.now() - user_profile.otp_timestamp).seconds < 10:
-                    data = {'success':'OTP Verified Successfully!', 'OTP':otp}
+                    data = {Constants.SUCCESS:'OTP Verified Successfully!', 'OTP':otp, Constants.PROFILE:model_to_dict(user_profile)}
                     return Response(data, status = status.HTTP_200_OK)
                 else:
-                    return Response({'failure':'OTP has expired!'}, status = status.HTTP_404_NOT_FOUND)
+                    return Response({Constants.FAILURE:'OTP has expired!', Constants.PROFILE:model_to_dict(user_profile)}, status = status.HTTP_404_NOT_FOUND)
             else:
-                return Response({'failure':'OTP Verification Failed!. The entered OTP is incorrect'}, status = status.HTTP_404_NOT_FOUND)
+                return Response({Constants.FAILURE:'OTP Verification Failed!. The entered OTP is incorrect', Constants.PROFILE:model_to_dict(user_profile)}, status = status.HTTP_404_NOT_FOUND)
 
 @api_view(['POST',])
 def add_address(request):
@@ -68,14 +72,14 @@ def add_address(request):
         otp_serializer = OTPSerializer(data = request.data)
 
         if not otp_serializer.is_valid():
-            return Response({'error':'Validation error!'})
+            return Response({Constants.ERROR:'Validation error!', Constants.PHONE_NUMBER:phone_number})
 
         profile_obj = None
 
         try:
             profile_obj = Profile.objects.get(phone_number = phone_number)
         except Profile.DoesNotExist:
-            return Response({'error':'Profile does not exist!'})
+            return Response({Constants.ERROR:'Profile does not exist!', Constants.PHONE_NUMBER:phone_number})
 
         data = request.data.dict()
         data['profile'] = profile_obj.pk
@@ -84,7 +88,7 @@ def add_address(request):
             return Response(address_serializer.errors, status = status.HTTP_422_UNPROCESSABLE_ENTITY)
 
         address_serializer.create()
-        return Response({'success':'Address saved successfully!','address':address_serializer.data})
+        return Response({Constants.SUCCESS:'Address saved successfully!','address':address_serializer.data})
 
 @api_view(['PUT',])
 def update_address(request):
@@ -92,22 +96,22 @@ def update_address(request):
         address_id = request.POST.get('address_id', None)
 
         if address_id is None:
-            return Response({'error':'Address id not found!'}, status = status.HTTP_404_NOT_FOUND)
+            return Response({Constants.ERROR:'Address id not found!'}, status = status.HTTP_404_NOT_FOUND)
 
         try:
             address_obj = Address.objects.get(pk = address_id)
         except Address.DoesNotExist:
-            return Response({'error':'Address does not exist'}, status = status.HTTP_404_NOT_FOUND)
+            return Response({Constants.ERROR:'Address does not exist'}, status = status.HTTP_404_NOT_FOUND)
 
         profile_obj =address_obj.profile
         data = request.data.dict()
         data['profile'] = profile_obj.pk
         address_serializer = AddressSerializer(data = data)
         if not address_serializer.is_valid():
-            return Response({'error':address_serializer.errors}, status = status.HTTP_422_UNPROCESSABLE_ENTITY)
+            return Response({Constants.ERROR:address_serializer.errors}, status = status.HTTP_422_UNPROCESSABLE_ENTITY)
 
-        address_serializer.update(instance = address_obj)
-        return Response({'success':'Address updated successfully!','address':address_serializer.data}, status = status.HTTP_200_OK)
+        updated_address = address_serializer.update(instance = address_obj)
+        return Response({Constants.SUCCESS:'Address updated successfully!','address':model_to_dict(updated_address)}, status = status.HTTP_200_OK)
 
 @api_view(['PUT',])
 def update_profile(request):
@@ -115,20 +119,20 @@ def update_profile(request):
         phone_number = request.POST.get('phone_number',None)
 
         if phone_number is None:
-            return Response({'error':'Phone number not provided!'}, status = status.HTTP_400_BAD_REQUEST)
+            return Response({Constants.ERROR:'Phone number not provided!'}, status = status.HTTP_400_BAD_REQUEST)
 
         try :
             profile_obj = Profile.objects.get(phone_number = phone_number)
         except Profile.DoesNotExist:
-            return Response({'error':'Profile does not exist!'}, status = status.HTTP_404_NOT_FOUND)
+            return Response({Constants.ERROR:'Profile does not exist!', Constants.PHONE_NUMBER:phone_number}, status = status.HTTP_404_NOT_FOUND)
 
         profile_serializer = ProfileSerializer(data = request.data)
 
         if not profile_serializer.is_valid():
-            return Response({'error':profile_serializer.errors}, status = status.HTTP_422_UNPROCESSABLE_ENTITY)
+            return Response({Constants.ERROR:profile_serializer.errors}, status = status.HTTP_422_UNPROCESSABLE_ENTITY)
 
-        profile_serializer.update(instance = profile_obj)
-        return Response({'success':'Profile updated successfully!','profile':profile_serializer.data}, status = status.HTTP_200_OK)
+        updated_profile = profile_serializer.update(instance = profile_obj)
+        return Response({Constants.SUCCESS:'Profile updated successfully!','profile':model_to_dict(updated_profile)}, status = status.HTTP_200_OK)
 
 @api_view(['POST',])
 def retrieve_address(request):
@@ -136,18 +140,18 @@ def retrieve_address(request):
         phone_number = request.POST.get('phone_number', None)
 
         if phone_number is None:
-            return Response({'error':'Phone number not provided!'}, status = status.HTTP_400_BAD_REQUEST)
+            return Response({Constants.ERROR:'Phone number not provided!'}, status = status.HTTP_400_BAD_REQUEST)
 
-        otp_serializer = OTPSerializer(data = data)
+        otp_serializer = OTPSerializer(data = request.data)
 
         if not otp_serializer.is_valid():
-            return Response({'error':'Validation error!'},status = status.HTTP_404_NOT_FOUND)
+            return Response({Constants.ERROR:'Validation error!', Constants.PHONE_NUMBER:phone_number},status = status.HTTP_404_NOT_FOUND)
 
         try:
             profile_obj = Profile.objects.get(phone_number = phone_number)
         except Profile.DoesNotExist:
-            return Response({'error':'Profile does not exist!'}, status = status.HTTP_404_NOT_FOUND)
+            return Response({Constants.ERROR:'Profile does not exist!'}, status = status.HTTP_404_NOT_FOUND)
 
         retrieved_addresses = Address.objects.filter(profile = profile_obj)
         retrieved_address_serializer = AddressSerializer(retrieved_addresses, many = True)
-        return Response({'success':'Phone numbers retrieved successfully!', 'addresses':retrieved_address_serializer.data}, status = status.HTTP_200_OK)
+        return Response({Constants.SUCCESS:'Phone numbers retrieved successfully!', 'addresses':retrieved_address_serializer.data}, status = status.HTTP_200_OK)
