@@ -67,24 +67,7 @@ def verify_otp(request):
 
 @api_view(['POST',])
 def add_address(request):
-    if request.method == "POST":
-        # phone_number = request.POST.get('phone_number')
-        # otp_serializer = OTPSerializer(data = request.data)
-
-        # if not otp_serializer.is_valid():
-        #     return Response({Constants.ERROR:'Validation error!', Constants.PHONE_NUMBER:phone_number})
-
-        # profile_obj = None
-
-        # try:
-        #     profile_obj = Profile.objects.get(phone_number = phone_number)
-        # except Profile.DoesNotExist:
-        #     return Response({Constants.ERROR:'Profile does not exist!', Constants.PHONE_NUMBER:phone_number})
-
-        # data = request.data.dict()
-        # data['profile'] = profile_obj.pk
-        print(request.data)
-        print(Profile.objects.all()[0].pk)
+    if request.method == "POST":       
         address_serializer = AddressSerializer(data = request.data)
         if not address_serializer.is_valid():
             print(address_serializer.errors)
