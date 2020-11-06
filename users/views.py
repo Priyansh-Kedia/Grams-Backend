@@ -23,7 +23,7 @@ def generate_otp(request):
         serializer = OTPSerializer(data = request.data)
 
         if not serializer.is_valid():
-            return Response({Constants.MESSAGE:'Phone Number Validation Error!', Constants.IS_VERIFIED:False}, status = status.HTTP_200_OK)
+            return Response({Constants.MESSAGE:'Phone Number Validation Error!',Constants.PROFILE:None, Constants.IS_VERIFIED:False}, status = status.HTTP_200_OK)
 
         try:
             user_profile = Profile.objects.get(phone_number = phone_number)
@@ -36,7 +36,7 @@ def generate_otp(request):
             data = {Constants.MESSAGE:'OTP Generated Successfully!', Constants.PROFILE:model_to_dict(user_profile), Constants.IS_VERIFIED:False}
             return Response(data, status = status.HTTP_200_OK)
         else:
-            return Response({Constants.ERROR:'User Does Not Exist', Constants.IS_VERIFIED:False, Constants.PROFILE:'Profile does not exist!'}, status = status.HTTP_200_OK)
+            return Response({Constants.MESSAGE:'User Does Not Exist', Constants.IS_VERIFIED:False, Constants.PROFILE:None}, status = status.HTTP_200_OK)
 
 @api_view(['POST',])
 def verify_otp(request):
@@ -63,7 +63,7 @@ def verify_otp(request):
                 else:
                     return Response({Constants.MESSAGE:'OTP has expired!'}, status = status.HTTP_200_OK)
             else:
-                return Response({Constants.MESSAGE:'OTP Verification Failed!. The entered OTP is incorrect', Constants.PROFILE:None, Constants.IS_VERIFIED:False}, status = status.HTTP_200_OK)
+                return Response({Constants.MESSAGE:'OTP Verification Failed!. The entered OTP is incorrect', Constants.PROFILE:model_to_dict(user_profile), Constants.IS_VERIFIED:False}, status = status.HTTP_200_OK)
 
 @api_view(['POST',])
 def add_address(request):
@@ -71,7 +71,7 @@ def add_address(request):
         address_serializer = AddressSerializer(data = request.data)
         if not address_serializer.is_valid():
             print(address_serializer.errors)
-            return Response(address_serializer.errors, status = status.HTTP_422_UNPROCESSABLE_ENTITY)
+            return Response(address_serializer.errors, status = status.HTTP_200_OK)
 
         address_serializer.create()
         return Response({Constants.SUCCESS:'Address saved successfully!','address':address_serializer.data})
