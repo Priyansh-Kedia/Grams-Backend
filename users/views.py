@@ -37,10 +37,7 @@ def generate_otp(request):
             return Response(data, status = status.HTTP_200_OK)
         else:
             return Response({Constants.ERROR:'User Does Not Exist'}, status = status.HTTP_404_NOT_FOUND)
-#create constant message error 
-#Dont send OTP
-#is verified boolean True False
-#profilr error None ad for success Profile
+
 @api_view(['POST',])
 def verify_otp(request):
     if request.method == "POST":
@@ -49,14 +46,14 @@ def verify_otp(request):
         serializer = OTPSerializer(data=request.data)
 
         if not serializer.is_valid():
-            return Response({Constants.MESSAGE:'Phone Number Not Validated!', Constants.PROFILE:'None', Constants.PHONE_NUMBER:phone_number, Constants.IS_VERFIED:False}, status = status.HTTP_422_UNPROCESSABLE_ENTITY)
+            return Response({Constants.MESSAGE:'Phone Number Not Validated!', Constants.PROFILE:'None', Constants.IS_VERIFIED:False}, status = status.HTTP_422_UNPROCESSABLE_ENTITY)
 
         user_profile = None
 
         try:
             user_profile = Profile.objects.get(phone_number = phone_number)
         except Profile.DoesNotExist:
-            return Response({Constants.MESSAGE:'None', Constants.PROFILE:'None', Constants.IS_VERFIED:False})
+            return Response({Constants.MESSAGE:'None', Constants.PROFILE:'None', Constants.IS_VERIFIED:False})
 
         if user_profile:
             if otp == str(user_profile.otp) :
