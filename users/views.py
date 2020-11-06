@@ -33,11 +33,14 @@ def generate_otp(request):
         if user_profile:
             user_profile.otp = otp
             user_profile.save()
-            data = {Constants.SUCCESS:'OTP Generated Successfully!', 'OTP':otp, Constants.PROFILE:model_to_dict(user_profile)}#add profile also
+            data = {Constants.MESSAGE:'OTP Generated Successfully!', 'OTP':otp, Constants.PROFILE:model_to_dict(user_profile)}#add profile also
             return Response(data, status = status.HTTP_200_OK)
         else:
             return Response({Constants.ERROR:'User Does Not Exist'}, status = status.HTTP_404_NOT_FOUND)
-
+#create constant message error 
+#Dont send OTP
+#is verified boolean True False
+#profilr error None ad for success Profile
 @api_view(['POST',])
 def verify_otp(request):
     if request.method == "POST":
@@ -46,24 +49,24 @@ def verify_otp(request):
         serializer = OTPSerializer(data=request.data)
 
         if not serializer.is_valid():
-            return Response({Constants.ERROR:'Phone Number Not Validated!',Constants.PHONE_NUMBER:phone_number}, status = status.HTTP_422_UNPROCESSABLE_ENTITY)
+            return Response({Constants.MESSAGE:'Phone Number Not Validated!', Constants.PROFILE:'None', Constants.PHONE_NUMBER:phone_number, Constants.IS_VERFIED:False}, status = status.HTTP_422_UNPROCESSABLE_ENTITY)
 
         user_profile = None
 
         try:
             user_profile = Profile.objects.get(phone_number = phone_number)
         except Profile.DoesNotExist:
-            return Response({Constants.ERROR:'Please Generate OTP First!'})
+            return Response({Constants.MESSAGE:'None', Constants.PROFILE:'None', Constants.IS_VERFIED:False})
 
         if user_profile:
             if otp == str(user_profile.otp) :
                 if (timezone.now() - user_profile.otp_timestamp).seconds < 10:
-                    data = {Constants.SUCCESS:'OTP Verified Successfully!', 'OTP':otp, Constants.PROFILE:model_to_dict(user_profile)}
+                    data = {Constants.MESSAGE:'OTP Verified Successfully!', Constants.PROFILE:model_to_dict(user_profile), Constants.IS_VERIFIED:True}
                     return Response(data, status = status.HTTP_200_OK)
                 else:
-                    return Response({Constants.FAILURE:'OTP has expired!', Constants.PROFILE:model_to_dict(user_profile)}, status = status.HTTP_404_NOT_FOUND)
+                    return Response({Constants.MESSAGE:'OTP has expired!'}, status = status.HTTP_404_NOT_FOUND)
             else:
-                return Response({Constants.FAILURE:'OTP Verification Failed!. The entered OTP is incorrect', Constants.PROFILE:model_to_dict(user_profile)}, status = status.HTTP_404_NOT_FOUND)
+                return Response({Constants.MESSAGE:'OTP Verification Failed!. The entered OTP is incorrect', Constants.PROFILE:'None', Constants.IS_VERIFIED:False}, status = status.HTTP_404_NOT_FOUND)
 
 @api_view(['POST',])
 def add_address(request):
