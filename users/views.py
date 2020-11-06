@@ -23,7 +23,7 @@ def generate_otp(request):
         serializer = OTPSerializer(data = request.data)
 
         if not serializer.is_valid():
-            return Response({Constants.MESSAGE:'Phone Number Validation Error!',Constants.PROFILE:None, Constants.IS_VERIFIED:False}, status = status.HTTP_200_OK)
+            return Response({Constants.MESSAGE:"Invalid phone number",Constants.PROFILE:None, Constants.IS_VERIFIED:False}, status = status.HTTP_200_OK)
 
         try:
             user_profile = Profile.objects.get(phone_number = phone_number)
