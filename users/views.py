@@ -46,7 +46,7 @@ def verify_otp(request):
         serializer = OTPSerializer(data=request.data)
 
         if not serializer.is_valid():
-            return Response({Constants.MESSAGE:'Phone Number Not Validated!', Constants.PROFILE:'None', Constants.IS_VERIFIED:False}, status = status.HTTP_200_OK)
+            return Response({Constants.MESSAGE:'Phone Number Not Validated!', Constants.PROFILE:None, Constants.IS_VERIFIED:False}, status = status.HTTP_200_OK)
 
         user_profile = None
 

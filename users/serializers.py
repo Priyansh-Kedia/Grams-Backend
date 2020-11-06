@@ -8,22 +8,18 @@ class OTPSerializer(serializers.Serializer):
     phone_number = serializers.CharField(max_length = 17, validators = [phone_regex])
 
 class AddressSerializer(serializers.ModelSerializer):
-    #address = serializers.CharField(max_length = 100, required = False)
-    #city = serializers.CharField(max_length = 100, required = False)
-    #state = serializers.CharField(max_length = 100, required = False)
-    #country = serializers.CharField(max_length = 100, required = False)
-
+    
     class Meta:
         model = Address
         fields = '__all__'
 
     def create(self):
         address = Address(
-            profile = self.validated_data['profile'],
-            address = self.validated_data['address'],
-            city = self.validated_data['city'],
-            state = self.validated_data['state'],
-            country = self.validated_data['country']
+            profile = self.validated_data["address"]["profile"],
+            address = self.validated_data["address"]["address"],
+            city = self.validated_data["address"]["city"],
+            state = self.validated_data["address"]["state"],
+            country = self.validated_data["address"]["country"],
         )
         address.save()
 
