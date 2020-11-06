@@ -46,7 +46,7 @@ def verify_otp(request):
         serializer = OTPSerializer(data=request.data)
 
         if not serializer.is_valid():
-            return Response({Constants.MESSAGE:'Phone Number Not Validated!', Constants.PROFILE:'None', Constants.IS_VERIFIED:False}, status = status.HTTP_422_UNPROCESSABLE_ENTITY)
+            return Response({Constants.MESSAGE:'Phone Number Not Validated!', Constants.PROFILE:'None', Constants.IS_VERIFIED:False}, status = status.HTTP_200_OK)
 
         user_profile = None
 
@@ -61,9 +61,9 @@ def verify_otp(request):
                     data = {Constants.MESSAGE:'OTP Verified Successfully!', Constants.PROFILE:model_to_dict(user_profile), Constants.IS_VERIFIED:True}
                     return Response(data, status = status.HTTP_200_OK)
                 else:
-                    return Response({Constants.MESSAGE:'OTP has expired!'}, status = status.HTTP_404_NOT_FOUND)
+                    return Response({Constants.MESSAGE:'OTP has expired!'}, status = status.HTTP_200_OK)
             else:
-                return Response({Constants.MESSAGE:'OTP Verification Failed!. The entered OTP is incorrect', Constants.PROFILE:'None', Constants.IS_VERIFIED:False}, status = status.HTTP_404_NOT_FOUND)
+                return Response({Constants.MESSAGE:'OTP Verification Failed!. The entered OTP is incorrect', Constants.PROFILE:None, Constants.IS_VERIFIED:False}, status = status.HTTP_200_OK)
 
 @api_view(['POST',])
 def add_address(request):
