@@ -11,7 +11,7 @@ from django.forms.models import model_to_dict
 
 from .serializers import OTPSerializer,AddressSerializer,ProfileSerializer
 from .models import Profile, Address
-from . import Constants
+from grams_backend import Constants
 
 
 @api_view(['POST',])
