@@ -12,7 +12,7 @@ from grams_backend import Constants
 
 
 @api_view(['GET',])
-def retrieve(request):
+def my_plans(request):
     if request.method == "GET":
         plans = Plan.objects.all()
         plan_serializer = PlanSerializer(plans, many = True)
