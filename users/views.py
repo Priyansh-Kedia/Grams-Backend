@@ -53,7 +53,7 @@ def verify_otp(request):
         try:
             user_profile = Profile.objects.get(phone_number = phone_number)
         except Profile.DoesNotExist:
-            return Response({Constants.MESSAGE:'Profile does not exist!', Constants.PROFILE:None, Constants.IS_VERIFIED:False})
+            return Response({Constants.MESSAGE:'Profile does not exist!', Constants.PROFILE:None, Constants.IS_VERIFIED:False}, status = status.HTTP_200_OK)
 
         if user_profile:
             if otp == str(user_profile.otp) :
@@ -61,20 +61,21 @@ def verify_otp(request):
                     data = {Constants.MESSAGE:'OTP Verified Successfully!', Constants.PROFILE:model_to_dict(user_profile), Constants.IS_VERIFIED:True}
                     return Response(data, status = status.HTTP_200_OK)
                 else:
-                    return Response({Constants.MESSAGE:'OTP has expired!'}, status = status.HTTP_200_OK)
+                    return Response({Constants.MESSAGE:'OTP has expired!', Constants.PROFILE:model_to_dict(user_profile), Constants.IS_VERIFIED:False}, status = status.HTTP_200_OK)
             else:
                 return Response({Constants.MESSAGE:'OTP Verification Failed!. The entered OTP is incorrect', Constants.PROFILE:model_to_dict(user_profile), Constants.IS_VERIFIED:False}, status = status.HTTP_200_OK)
 
 @api_view(['POST',])
 def add_address(request):
-    if request.method == "POST":       
+    if request.method == "POST":   
+        print(request.data)    
         address_serializer = AddressSerializer(data = request.data)
-        if not address_serializer.is_valid():
-            print(address_serializer.errors)
-            return Response(address_serializer.errors, status = status.HTTP_200_OK)
 
+        if not address_serializer.is_valid():
+            return Response(address_serializer.errors, status = status.HTTP_200_OK)
+        print(address_serializer.errors)
         address_serializer.create()
-        return Response({Constants.SUCCESS:'Address saved successfully!','address':address_serializer.data})
+        return Response({Constants.MESSAGE:'Address saved successfully!', Constants.ADDRESS:address_serializer.data}, status = status.HTTP_200_OK)
 
 @api_view(['PUT',])
 def update_address(request):
