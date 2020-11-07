@@ -17,6 +17,7 @@ from grams_backend import Constants
 @api_view(['POST',])
 def generate_otp(request):
     if request.method == "POST":
+        hashValue = request.POST.get('hash')
         user_profile = None
         phone_number = request.POST.get('phone_number')
         otp = random.randint(1111, 9999)
@@ -32,8 +33,9 @@ def generate_otp(request):
 
         if user_profile:
             user_profile.otp = otp
-            user_profile.save()
-            data = {Constants.MESSAGE:'OTP Generated Successfully!', Constants.PROFILE:model_to_dict(user_profile), Constants.IS_VERIFIED:False}
+            user_profile.save()          
+            message = "<#> Your GramsApp code is: {otp} {hash}".format(otp = otp,hash = hashValue)
+            data = {Constants.MESSAGE:message, Constants.PROFILE:model_to_dict(user_profile), Constants.IS_VERIFIED:False}
             return Response(data, status = status.HTTP_200_OK)
         else:
             return Response({Constants.MESSAGE:'User Does Not Exist', Constants.IS_VERIFIED:False, Constants.PROFILE:None}, status = status.HTTP_200_OK)
