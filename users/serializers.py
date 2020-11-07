@@ -12,6 +12,7 @@ class AddressSerializer(serializers.ModelSerializer):
     class Meta:
         model = Address
         fields = '__all__'
+        
 
     def create(self):
         address = Address(

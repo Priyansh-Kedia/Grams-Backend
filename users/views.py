@@ -57,7 +57,7 @@ def verify_otp(request):
 
         if user_profile:
             if otp == str(user_profile.otp) :
-                if (timezone.now() - user_profile.otp_timestamp).seconds < 10:
+                if (timezone.now() - user_profile.otp_timestamp).seconds < 1800:
                     data = {Constants.MESSAGE:'OTP Verified Successfully!', Constants.PROFILE:model_to_dict(user_profile), Constants.IS_VERIFIED:True}
                     return Response(data, status = status.HTTP_200_OK)
                 else:
@@ -68,12 +68,13 @@ def verify_otp(request):
 @api_view(['POST',])
 def add_address(request):
     if request.method == "POST":   
-        print(request.data)    
         address_serializer = AddressSerializer(data = request.data)
+        print(repr(address_serializer))
+        
 
         if not address_serializer.is_valid():
             return Response(address_serializer.errors, status = status.HTTP_200_OK)
-        print(address_serializer.errors)
+        print(address_serializer.data)
         address_serializer.create()
         return Response({Constants.MESSAGE:'Address saved successfully!', Constants.ADDRESS:address_serializer.data}, status = status.HTTP_200_OK)
 
