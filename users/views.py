@@ -34,7 +34,7 @@ def generate_otp(request):
         if user_profile:
             user_profile.otp = otp
             user_profile.save()          
-            message = "<#> Your GramsApp code is: {otp} {hash}".format(otp = otp,hash = hashValue)
+            message = "<#> Your GramsApp code is: {otp} \n {hash}".format(otp = otp,hash = hashValue)
             print(message)
             data = {Constants.MESSAGE:message, Constants.PROFILE:model_to_dict(user_profile), Constants.IS_VERIFIED:False}
             return Response(data, status = status.HTTP_200_OK)
