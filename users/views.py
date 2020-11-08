@@ -126,9 +126,8 @@ def update_profile(request):
 
 @api_view(['GET',])
 def retrieve_address(request):
-    if request.method == "POST":
-        profile_id = request.POST.get('profile_id', None)
-
+    if request.method == "GET":
+        profile_id = request.GET.get('profile_id', None)
         if profile_id is None:
             return Response({Constants.MESSAGE:' Profile id not provided!'}, status = status.HTTP_200_OK)
 
@@ -144,8 +143,8 @@ def retrieve_address(request):
 
 @api_view(['GET',])
 def retrieve_profile(request):
-    if request.method == "POST":
-        profile_id = request.POST.get('profile_id', None)
+    if request.method == "GET":
+        profile_id = request.GET.get('profile_id', None)
 
         try:
             profile_obj = Profile.objects.get(pk = profile_id)
