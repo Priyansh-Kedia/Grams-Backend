@@ -124,7 +124,7 @@ def update_profile(request):
         updated_profile = profile_serializer.update(instance = profile_obj)
         return Response({Constants.SUCCESS:'Profile updated successfully!','profile':model_to_dict(updated_profile)}, status = status.HTTP_200_OK)
 
-@api_view(['POST',])
+@api_view(['GET',])
 def retrieve_address(request):
     if request.method == "POST":
         profile_id = request.POST.get('profile_id', None)
@@ -142,7 +142,7 @@ def retrieve_address(request):
         print(repr(retrieved_address_serializer))
         return Response({Constants.MESSAGE:'Phone numbers retrieved successfully!', Constants.ADDRESS:retrieved_address_serializer.data}, status = status.HTTP_200_OK)
 
-@api_view(['POST',])
+@api_view(['GET',])
 def retrieve_profile(request):
     if request.method == "POST":
         profile_id = request.POST.get('profile_id', None)
@@ -157,8 +157,6 @@ def retrieve_profile(request):
         if not profile_serializer.is_valid():           
             return Response(profile_serializer.errors, status = status.HTTP_200_OK)
 
-        #profile_serializer.data['id'] = profile_id
         updated_dict={'id':profile_id}
         updated_dict.update(profile_serializer.data)
-        #data = {Constants.PROFILE:profile_serializer.data}
         return Response(updated_dict, status = status.HTTP_200_OK)
