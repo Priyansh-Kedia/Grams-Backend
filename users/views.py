@@ -109,21 +109,18 @@ def update_address(request):
 @api_view(['PUT',])
 def update_profile(request):
     if request.method == "PUT":
-        phone_number = request.POST.get('phone_number',None)
-
-        if phone_number is None:
-            return Response({Constants.ERROR:'Phone number not provided!'}, status = status.HTTP_400_BAD_REQUEST)
+        profile_id = request.POST.get('profile_id',None)
 
         try :
-            profile_obj = Profile.objects.get(phone_number = phone_number)
+            profile_obj = Profile.objects.get(pk = profile_id)
         except Profile.DoesNotExist:
-            return Response({Constants.ERROR:'Profile does not exist!', Constants.PHONE_NUMBER:phone_number}, status = status.HTTP_404_NOT_FOUND)
+            return Response({Constants.ERROR:'Profile does not exist!'}, status = status.HTTP_404_NOT_FOUND)
 
         profile_serializer = ProfileSerializer(data = request.data)
 
         if not profile_serializer.is_valid():
             return Response({Constants.ERROR:profile_serializer.errors}, status = status.HTTP_422_UNPROCESSABLE_ENTITY)
-
+        
         updated_profile = profile_serializer.update(instance = profile_obj)
         return Response({Constants.SUCCESS:'Profile updated successfully!','profile':model_to_dict(updated_profile)}, status = status.HTTP_200_OK)
 
@@ -143,3 +140,20 @@ def retrieve_address(request):
         retrieved_addresses = Address.objects.filter(profile = profile_obj)
         retrieved_address_serializer = AddressSerializer(retrieved_addresses, many = True)
         return Response({Constants.MESSAGE:'Phone numbers retrieved successfully!', Constants.ADDRESS:retrieved_address_serializer.data}, status = status.HTTP_200_OK)
+
+@api_view(['POST',])
+def retrieve_profile(request):
+    if request.method == "POST":
+        profile_id = request.POST.get('profile_id', None)
+
+        try:
+            profile_obj = Profile.objects.filter(pk = profile_id)
+        except Profile.DoesNotExist:
+            return Response({Constants.MESSAGE:'Profile does not exist!'}, status = status.HTTP_200_OK)
+            
+        profile_serializer = ProfileSerializer(profile_obj)
+        
+        if not profile_serializer.is_valid():
+            return Response(ProfileSerializer.errors, status = status.HTTP_200_OK)
+        #print(profile_serializer.data)
+        return Response(profile_serializer.data, status = status.HTTP_200_OK)
