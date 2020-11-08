@@ -130,12 +130,12 @@ def retrieve_address(request):
         profile_id = request.GET.get('profile_id', None)
        
         if profile_id is None:
-            return Response({Constants.MESSAGE:' Profile id not provided!'}, status = status.HTTP_200_OK)
+            return Response({Constants.MESSAGE:' Profile id not provided!'}, status = status.HTTP_400_BAD_REQUEST)
 
         try:
             profile_obj = Profile.objects.get(pk = profile_id)
         except Profile.DoesNotExist:
-            return Response({Constants.MESSAGE:'Profile does not exist!'}, status = status.HTTP_200_OK)
+            return Response({Constants.MESSAGE:'Profile does not exist!'}, status = status.HTTP_404_NOT_FOUND)
        
         retrieved_addresses = Address.objects.filter(profile = profile_obj)
         retrieved_address_serializer = AddressSerializer(retrieved_addresses, many = True)
