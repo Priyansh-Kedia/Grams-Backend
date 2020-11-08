@@ -18,8 +18,10 @@ from grams_backend import Constants
 def generate_otp(request):
     if request.method == "POST":
         hashValue = request.POST.get('hash')
+        phone_number = request.POST.get('phone_number')         
+
         user_profile = None
-        phone_number = request.POST.get('phone_number')
+
         otp = random.randint(1111, 9999)
         serializer = OTPSerializer(data = request.data)
 
@@ -128,21 +130,16 @@ def update_profile(request):
 @api_view(['POST',])
 def retrieve_address(request):
     if request.method == "POST":
-        phone_number = request.POST.get('phone_number', None)
+        profile_id = request.POST.get('profile_id', None)
 
-        if phone_number is None:
-            return Response({Constants.ERROR:'Phone number not provided!'}, status = status.HTTP_400_BAD_REQUEST)
-
-        otp_serializer = OTPSerializer(data = request.data)
-
-        if not otp_serializer.is_valid():
-            return Response({Constants.ERROR:'Validation error!', Constants.PHONE_NUMBER:phone_number},status = status.HTTP_404_NOT_FOUND)
+        if profile_id is None:
+            return Response({Constants.MESSAGE:' Profile id not provided!'}, status = status.HTTP_200_OK)
 
         try:
-            profile_obj = Profile.objects.get(phone_number = phone_number)
+            profile_obj = Profile.objects.get(pk = profile_id)
         except Profile.DoesNotExist:
-            return Response({Constants.ERROR:'Profile does not exist!'}, status = status.HTTP_404_NOT_FOUND)
+            return Response({Constants.MESSAGE:'Profile does not exist!'}, status = status.HTTP_200_OK)
 
         retrieved_addresses = Address.objects.filter(profile = profile_obj)
         retrieved_address_serializer = AddressSerializer(retrieved_addresses, many = True)
-        return Response({Constants.SUCCESS:'Phone numbers retrieved successfully!', 'addresses':retrieved_address_serializer.data}, status = status.HTTP_200_OK)
+        return Response({Constants.MESSAGE:'Phone numbers retrieved successfully!', Constants.ADDRESS:retrieved_address_serializer.data}, status = status.HTTP_200_OK)
