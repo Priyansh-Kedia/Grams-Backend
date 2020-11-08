@@ -8,8 +8,8 @@ import datetime
 import csv
 from django.core.files import File
 import os
-#2os.chdir("path/to")
-
+from rest_framework.decorators import parser_classes
+from rest_framework.parsers import MultiPartParser,JSONParser
 
 from grams_backend import Constants
 from .models import Profile
@@ -17,6 +17,7 @@ from .serializers import GrainSerializer
 
 
 @api_view(['POST',])
+@parser_classes([JSONParser,MultiPartParser])
 def add_grain(request):
     if request.method == "POST":
         profile_id = request.POST.get('profile_id')
@@ -33,7 +34,7 @@ def add_grain(request):
 
         data = request.data.dict()
         data['profile'] = profile_id           
-        data['csv_file'] = File(open("grains/csv_file.csv")) 
+        #data['csv_file'] = File(open("grains/csv_file.csv")) 
         grain_serializer = GrainSerializer(data = data)
         
         if not grain_serializer.is_valid():
@@ -41,8 +42,8 @@ def add_grain(request):
         
         print(grain_serializer.data)
         print(repr(grain_serializer))
-        #return Response(grain_serializer.data, status = status.HTTP_200_OK)
-        return Response({'file':os.path.abspath('csv_file')}, status = status.HTTP_200_OK)
+        return Response(grain_serializer.data, status = status.HTTP_200_OK)
+        #return Response({'file':os.path.abspath('csv_file')}, status = status.HTTP_200_OK)
         
        
         
