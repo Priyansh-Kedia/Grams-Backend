@@ -32,7 +32,7 @@ class AddressSerializer(serializers.ModelSerializer):
         instance.save()
         return instance
 
-class ProfileSerializer(serializers.Serializer):
+class ProfileSerializer(serializers.ModelSerializer):
     phone_regex = RegexValidator(regex = r'^\+\d{4,15}$', message = "Phone number must be entered in the format: '+999999999'. Up to 15 digits allowed.")
     phone_number = serializers.CharField(max_length = 17, validators = [phone_regex],required = False)
     company_name = serializers.CharField(max_length = 100, required = False)
@@ -41,8 +41,12 @@ class ProfileSerializer(serializers.Serializer):
     email_id = serializers.EmailField(max_length = 100, required = False)
     is_agreed = serializers.BooleanField(required = False)
 
+    class Meta:
+        model = Profile
+        fields = ['id','name', 'company_name', 'name', 'email_id', 'is_agreed', 'phone_number', 'designation']
+        
     def update(self, instance):
-        #phone_number = self.validated_data.get('phone_number')
+        
         instance.phone_number = self.validated_data.get('phone_number', instance.phone_number)
         instance.company_name = self.validated_data.get('company_name', instance.company_name)
         instance.name = self.validated_data.get('name', instance.name)

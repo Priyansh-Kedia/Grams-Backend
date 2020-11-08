@@ -136,9 +136,10 @@ def retrieve_address(request):
             profile_obj = Profile.objects.get(pk = profile_id)
         except Profile.DoesNotExist:
             return Response({Constants.MESSAGE:'Profile does not exist!'}, status = status.HTTP_200_OK)
-
+       
         retrieved_addresses = Address.objects.filter(profile = profile_obj)
         retrieved_address_serializer = AddressSerializer(retrieved_addresses, many = True)
+        print(repr(retrieved_address_serializer))
         return Response({Constants.MESSAGE:'Phone numbers retrieved successfully!', Constants.ADDRESS:retrieved_address_serializer.data}, status = status.HTTP_200_OK)
 
 @api_view(['POST',])
@@ -147,13 +148,17 @@ def retrieve_profile(request):
         profile_id = request.POST.get('profile_id', None)
 
         try:
-            profile_obj = Profile.objects.filter(pk = profile_id)
+            profile_obj = Profile.objects.get(pk = profile_id)
         except Profile.DoesNotExist:
             return Response({Constants.MESSAGE:'Profile does not exist!'}, status = status.HTTP_200_OK)
             
-        profile_serializer = ProfileSerializer(profile_obj)
+        profile_serializer = ProfileSerializer(data = model_to_dict( profile_obj))
         
-        if not profile_serializer.is_valid():
-            return Response(ProfileSerializer.errors, status = status.HTTP_200_OK)
-        #print(profile_serializer.data)
-        return Response(profile_serializer.data, status = status.HTTP_200_OK)
+        if not profile_serializer.is_valid():           
+            return Response(profile_serializer.errors, status = status.HTTP_200_OK)
+
+        #profile_serializer.data['id'] = profile_id
+        updated_dict={'id':profile_id}
+        updated_dict.update(profile_serializer.data)
+        #data = {Constants.PROFILE:profile_serializer.data}
+        return Response(updated_dict, status = status.HTTP_200_OK)
