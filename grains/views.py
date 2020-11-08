@@ -40,10 +40,11 @@ def add_grain(request):
         if not grain_serializer.is_valid():
             return Response(grain_serializer.errors, status = status.HTTP_200_OK)
         
-        print(grain_serializer.data)
-        print(repr(grain_serializer))
-        return Response(grain_serializer.data, status = status.HTTP_200_OK)
-        #return Response({'file':os.path.abspath('csv_file')}, status = status.HTTP_200_OK)
+
+
+        #return Response(grain_serializer.data, status = status.HTTP_200_OK)
+        return Response({'file':File(open("grains/csv_file.csv"))}, content_type="text/csv", status = status.HTTP_200_OK)
+
         
        
         
