@@ -1,6 +1,6 @@
 from rest_framework import serializers
 from django.core.validators import RegexValidator
-
+import re
 from .models import Profile, Address
 
 class OTPSerializer(serializers.Serializer):
@@ -44,14 +44,18 @@ class ProfileSerializer(serializers.ModelSerializer):
     class Meta:
         model = Profile
         fields = ['id','name', 'company_name', 'name', 'email_id', 'is_agreed', 'phone_number', 'designation']
-        
+
     def update(self, instance):
         
         instance.phone_number = self.validated_data.get('phone_number', instance.phone_number)
         instance.company_name = self.validated_data.get('company_name', instance.company_name)
+        instance.company_name = " ".join(w.capitalize() for w in re.split('\\s+', instance.company_name))
         instance.name = self.validated_data.get('name', instance.name)
+        instance.name = " ".join(w.capitalize() for w in re.split('\\s+', instance.name))
         instance.designation = self.validated_data.get('designation', instance.designation)
+        instance.designation = " ".join(w.capitalize() for w in re.split('\\s+', instance.designation))
         instance.email_id = self.validated_data.get('email_id', instance.email_id)
+        instance.email_id = instance.email_id.lower()
         instance.is_agreed = self.validated_data.get('is_agreed', instance.is_agreed)
         instance.save()
         return instance
