@@ -14,10 +14,13 @@ from grams_backend import Constants
 @api_view(['GET',])
 def my_plans(request):
     if request.method == "GET":
-        plans = Plan.objects.all()
-        plan_serializer = PlanSerializer(plans, many = True)
-        #if not plan_serializer.is_valid():
-        #    return Response(plan_serializer.errors, status = status.HTTP_200_OK)
+        plans = Plan.objects.get()
+        print(plans)
+        plan_serializer = PlanSerializer(data = model_to_dict(plans), many = True)
+
+        if not plan_serializer.is_valid():
+            return Response(plan_serializer.errors, status = status.HTTP_422_UNPROCESSABLE_ENTITY)
+
         data = {Constants.PLANS:plan_serializer.data}
         return Response(data, status = status.HTTP_200_OK)
 

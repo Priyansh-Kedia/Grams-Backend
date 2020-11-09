@@ -7,7 +7,6 @@ from django.utils import timezone
 import datetime
 import csv
 from django.core.files import File
-import os
 from rest_framework.decorators import parser_classes
 from rest_framework.parsers import MultiPartParser,JSONParser
 
@@ -23,7 +22,7 @@ def add_grain(request):
         profile_id = request.POST.get('profile_id')
         image = request.data.get('image')
         image_name = str(image)
-
+        
         try:
             profile_obj = Profile.objects.get(pk = profile_id)
         except Profile.DoesNotExist:
@@ -39,10 +38,7 @@ def add_grain(request):
         
         if not grain_serializer.is_valid():
             return Response(grain_serializer.errors, status = status.HTTP_200_OK)
-        
-
-
-        #return Response(grain_serializer.data, status = status.HTTP_200_OK)
+    
         return Response({'file':File(open("grains/csv_file.csv"))}, content_type="text/csv", status = status.HTTP_200_OK)
 
         
