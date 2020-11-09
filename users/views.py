@@ -93,10 +93,10 @@ def retrieve_profile(request):
     if request.method == "GET":
         profile_id = request.GET.get(Constants.PROFILE_ID, None)
 
-        try:
-            profile_obj = Profile.objects.get(pk = profile_id)
-        except Profile.DoesNotExist:
-            return Response({Constants.MESSAGE:'Profile does not exist!'}, status = status.HTTP_404_NOT_FOUND)
+        #try:
+        #    profile_obj = Profile.objects.get(pk = profile_id)
+        #except Profile.DoesNotExist:
+        #    return Response({Constants.MESSAGE:'Profile does not exist!'}, status = status.HTTP_404_NOT_FOUND)
             
         profile_serializer = ProfileSerializer(data = model_to_dict(profile_obj))
         
@@ -116,13 +116,7 @@ def retrieve_profile(request):
 @api_view(['POST',])
 def add_address(request):
     if request.method == "POST":   
-        profile_id = request.POST.get(Constants.PROFILE_ID, None)
-        print(request.data)
-        try:
-            profile_obj = Profile.objects.get(pk = profile_id)
-        except Profile.DoesNotExist:
-            return Response({Constants.MESSAGE:"Profile does not exist!"}, status = status.HTTP_404_NOT_FOUND)
-       
+        profile_id = request.POST.get(Constants.PROFILE_ID, None)       
         address_serializer = AddressSerializer(data = request.data)        
         if not address_serializer.is_valid():
             return Response(address_serializer.errors, status = status.HTTP_422_UNPROCESSABLE_ENTITY)
