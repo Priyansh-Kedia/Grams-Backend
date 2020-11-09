@@ -18,14 +18,11 @@ def generate_otp(request):
     if request.method == "POST":
         hashValue = request.POST.get('hash')
         phone_number = request.POST.get('phone_number')         
-
-        user_profile = None
-
         otp = random.randint(1111, 9999)
         serializer = OTPSerializer(data = request.data)
 
         if not serializer.is_valid():
-            return Response({Constants.MESSAGE:"Invalid phone number",Constants.PROFILE:None, Constants.IS_VERIFIED:False}, status = status.HTTP_200_OK)
+            return Response({Constants.MESSAGE:"Invalid phone number", Constants.PROFILE:None, Constants.IS_VERIFIED:False}, status = status.HTTP_200_OK)
 
         try:
             user_profile = Profile.objects.get(phone_number = phone_number)
@@ -35,8 +32,7 @@ def generate_otp(request):
         if user_profile:
             user_profile.otp = otp
             user_profile.save()          
-            message = "<#> Your GramsApp code is: {otp} \n {hash}".format(otp = otp,hash = hashValue)
-            print(message)
+            message = "<#> Your GramsApp code is: {otp} \n {hash}".format(otp = otp, hash = hashValue)
             data = {Constants.MESSAGE:message, Constants.PROFILE:model_to_dict(user_profile), Constants.IS_VERIFIED:False}
             return Response(data, status = status.HTTP_200_OK)
         else:
@@ -51,8 +47,6 @@ def verify_otp(request):
 
         if not serializer.is_valid():
             return Response({Constants.MESSAGE:'Phone Number Not Validated!', Constants.PROFILE:None, Constants.IS_VERIFIED:False}, status = status.HTTP_200_OK)
-
-        user_profile = None
 
         try:
             user_profile = Profile.objects.get(phone_number = phone_number)
@@ -72,15 +66,13 @@ def verify_otp(request):
 @api_view(['POST',])
 def add_address(request):
     if request.method == "POST":   
-        address_serializer = AddressSerializer(data = request.data)
-        print(repr(address_serializer))
-        
+        address_serializer = AddressSerializer(data = request.data)        
 
         if not address_serializer.is_valid():
-            return Response(address_serializer.errors, status = status.HTTP_200_OK)
-        print(address_serializer.data)
-        address_serializer.create()
-        return Response({Constants.MESSAGE:'Address saved successfully!', Constants.ADDRESS:address_serializer.data}, status = status.HTTP_200_OK)
+            return Response(address_serializer.errors, status = status.HTTP_422_UNPROCESSABLE_ENTITY)
+        
+        updated_address_obj = address_serializer.create()
+        return Response({Constants.MESSAGE:'Address saved successfully!', Constants.ADDRESS:model_to_dict(updated_address_obj)}, status = status.HTTP_200_OK)
 
 @api_view(['PUT',])
 def update_address(request):
@@ -101,7 +93,7 @@ def update_address(request):
             return Response({Constants.MESSAGE:address_serializer.errors}, status = status.HTTP_422_UNPROCESSABLE_ENTITY)
 
         updated_address = address_serializer.update(instance = address_obj)
-        return Response({Constants.MESSAGE:'Address updated successfully!','address':model_to_dict(updated_address)}, status = status.HTTP_200_OK)
+        return Response({Constants.MESSAGE:'Address updated successfully!', 'address':model_to_dict(updated_address)}, status = status.HTTP_200_OK)
 
 @api_view(['PUT',])
 def update_profile(request):
