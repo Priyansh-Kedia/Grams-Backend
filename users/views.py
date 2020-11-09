@@ -117,7 +117,7 @@ def update_profile(request):
 def retrieve_address(request):
     if request.method == "GET":
         profile_id = request.GET.get('profile_id', None)
-    
+
         try:
             profile_obj = Profile.objects.get(pk = profile_id)
         except Profile.DoesNotExist:
@@ -125,12 +125,12 @@ def retrieve_address(request):
        
         retrieved_addresses = Address.objects.filter(profile = profile_obj)
         retrieved_address_serializer = AddressSerializer(retrieved_addresses, many = True)
-        return Response({Constants.MESSAGE:'Phone numbers retrieved successfully!', Constants.ADDRESS:retrieved_address_serializer.data}, status = status.HTTP_200_OK)
+        return Response(retrieved_address_serializer.data, status = status.HTTP_200_OK)
 
 @api_view(['GET',])
 def retrieve_profile(request):
-    if request.method == "GET":
-        profile_id = request.GET.get('profile_id', None)
+    if request.method == "POST":
+        profile_id = request.POST.get('profile_id', None)
 
         try:
             profile_obj = Profile.objects.get(pk = profile_id)
