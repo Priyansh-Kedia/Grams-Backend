@@ -8,7 +8,6 @@ from django.utils import timezone
 import random
 from django.forms.models import model_to_dict
 
-
 from .serializers import OTPSerializer,AddressSerializer,ProfileSerializer
 from .models import Profile, Address
 from grams_backend import Constants
@@ -88,23 +87,21 @@ def update_address(request):
     if request.method == "PUT":
         address_id = request.POST.get('address_id', None)
 
-        if address_id is None:
-            return Response({Constants.ERROR:'Address id not found!'}, status = status.HTTP_404_NOT_FOUND)
-
         try:
             address_obj = Address.objects.get(pk = address_id)
         except Address.DoesNotExist:
-            return Response({Constants.ERROR:'Address does not exist'}, status = status.HTTP_404_NOT_FOUND)
+            return Response({Constants.MESSAGE:'Address does not exist'}, status = status.HTTP_404_NOT_FOUND)
 
-        profile_obj =address_obj.profile
+        profile_obj = address_obj.profile
         data = request.data.dict()
         data['profile'] = profile_obj.pk
         address_serializer = AddressSerializer(data = data)
+
         if not address_serializer.is_valid():
-            return Response({Constants.ERROR:address_serializer.errors}, status = status.HTTP_422_UNPROCESSABLE_ENTITY)
+            return Response({Constants.MESSAGE:address_serializer.errors}, status = status.HTTP_422_UNPROCESSABLE_ENTITY)
 
         updated_address = address_serializer.update(instance = address_obj)
-        return Response({Constants.SUCCESS:'Address updated successfully!','address':model_to_dict(updated_address)}, status = status.HTTP_200_OK)
+        return Response({Constants.MESSAGE:'Address updated successfully!','address':model_to_dict(updated_address)}, status = status.HTTP_200_OK)
 
 @api_view(['PUT',])
 def update_profile(request):
@@ -114,31 +111,28 @@ def update_profile(request):
         try :
             profile_obj = Profile.objects.get(pk = profile_id)
         except Profile.DoesNotExist:
-            return Response({Constants.ERROR:'Profile does not exist!'}, status = status.HTTP_404_NOT_FOUND)
+            return Response({Constants.MESSAGE:'Profile does not exist!'}, status = status.HTTP_404_NOT_FOUND)
 
         profile_serializer = ProfileSerializer(data = request.data)
 
         if not profile_serializer.is_valid():
-            return Response({Constants.ERROR:profile_serializer.errors}, status = status.HTTP_422_UNPROCESSABLE_ENTITY)
+            return Response({Constants.MESSAGE:profile_serializer.errors}, status = status.HTTP_422_UNPROCESSABLE_ENTITY)
         
         updated_profile = profile_serializer.update(instance = profile_obj)
-        return Response({Constants.SUCCESS:'Profile updated successfully!','profile':model_to_dict(updated_profile)}, status = status.HTTP_200_OK)
+        return Response({Constants.MESSAGE:'Profile updated successfully!','profile':model_to_dict(updated_profile)}, status = status.HTTP_200_OK)
 
 @api_view(['GET',])
 def retrieve_address(request):
     if request.method == "GET":
         profile_id = request.GET.get('profile_id', None)
-        if profile_id is None:
-            return Response({Constants.MESSAGE:' Profile id not provided!'}, status = status.HTTP_200_OK)
-
+    
         try:
             profile_obj = Profile.objects.get(pk = profile_id)
         except Profile.DoesNotExist:
-            return Response({Constants.MESSAGE:'Profile does not exist!'}, status = status.HTTP_200_OK)
+            return Response({Constants.MESSAGE:'Profile does not exist!'}, status = status.HTTP_404_NOT_FOUND)
        
         retrieved_addresses = Address.objects.filter(profile = profile_obj)
         retrieved_address_serializer = AddressSerializer(retrieved_addresses, many = True)
-        print(repr(retrieved_address_serializer))
         return Response({Constants.MESSAGE:'Phone numbers retrieved successfully!', Constants.ADDRESS:retrieved_address_serializer.data}, status = status.HTTP_200_OK)
 
 @api_view(['GET',])
@@ -149,12 +143,12 @@ def retrieve_profile(request):
         try:
             profile_obj = Profile.objects.get(pk = profile_id)
         except Profile.DoesNotExist:
-            return Response({Constants.MESSAGE:'Profile does not exist!'}, status = status.HTTP_200_OK)
+            return Response({Constants.MESSAGE:'Profile does not exist!'}, status = status.HTTP_404_NOT_FOUND)
             
-        profile_serializer = ProfileSerializer(data = model_to_dict( profile_obj))
+        profile_serializer = ProfileSerializer(data = model_to_dict(profile_obj))
         
         if not profile_serializer.is_valid():           
-            return Response(profile_serializer.errors, status = status.HTTP_200_OK)
+            return Response(profile_serializer.errors, status = status.HTTP_422_UNPROCESSABLE_ENTITY)
 
         updated_dict={'id':profile_id}
         updated_dict.update(profile_serializer.data)

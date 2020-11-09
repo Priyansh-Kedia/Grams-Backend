@@ -26,9 +26,13 @@ class AddressSerializer(serializers.ModelSerializer):
 
     def update(self, instance):
         instance.address = self.validated_data.get('address', instance.address)
+        instance.address = " ".join(w.capitalize() for w in re.split('\\s+', instance.address))
         instance.city = self.validated_data.get('city', instance.city)
+        instance.city = " ".join(w.capitalize() for w in re.split('\\s+', instance.city))
         instance.state = self.validated_data.get('state', instance.state)
+        instance.state = " ".join(w.capitalize() for w in re.split('\\s+', instance.state))
         instance.country = self.validated_data.get('country', instance.country)
+        instance.country = " ".join(w.capitalize() for w in re.split('\\s+', instance.country))
         instance.save()
         return instance
 
