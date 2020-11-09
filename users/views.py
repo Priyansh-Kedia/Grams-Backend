@@ -13,6 +13,8 @@ from .models import Profile, Address
 from grams_backend import Constants
 
 
+# OTP #
+# ======================================================================================================================================= #
 @api_view(['POST',])
 def generate_otp(request):
     if request.method == "POST":
@@ -63,6 +65,10 @@ def verify_otp(request):
             else:
                 return Response({Constants.MESSAGE:'OTP Verification Failed!. The entered OTP is incorrect', Constants.PROFILE:model_to_dict(user_profile), Constants.IS_VERIFIED:False}, status = status.HTTP_200_OK)
 
+# ======================================================================================================================================= #
+
+# Profile #
+# ======================================================================================================================================= #
 
 @api_view(['PUT',])
 def update_profile(request):
@@ -101,6 +107,11 @@ def retrieve_profile(request):
         updated_dict.update(profile_serializer.data)
         return Response(updated_dict, status = status.HTTP_200_OK)
 
+# ======================================================================================================================================= #
+
+
+# Address #
+# ======================================================================================================================================= #
 
 @api_view(['POST',])
 def add_address(request):
@@ -157,4 +168,4 @@ def retrieve_address(request):
         retrieved_address_serializer = AddressSerializer(retrieved_addresses, many = True)
         return Response(retrieved_address_serializer.data, status = status.HTTP_200_OK)
 
-
+# ======================================================================================================================================= #
