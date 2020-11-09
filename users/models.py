@@ -21,7 +21,7 @@ class Profile(models.Model):
         verbose_name_plural = "Profiles"
 
 class Address(models.Model):
-    profile = models.ForeignKey(to = Profile, on_delete = models.CASCADE)
+    profile_id = models.ForeignKey(to = Profile, on_delete = models.CASCADE)
     address = models.CharField(max_length = 100, null = True, blank = True)
     city = models.CharField(max_length = 100, null = True, blank = True)
     state = models.CharField(max_length = 100, null = True, blank = True)

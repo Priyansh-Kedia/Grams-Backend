@@ -23,7 +23,7 @@ class AddressSerializer(serializers.ModelSerializer):
     
     def create(self):
         address = Address(
-            profile = self.validated_data["profile"],
+            profile_id = self.validated_data["profile_id"],
             address = self.first_letter_capitalized_form(self.validated_data["address"]),
             city = self.first_letter_capitalized_form(self.validated_data["city"]),
             state = self.first_letter_capitalized_form(self.validated_data["state"]),

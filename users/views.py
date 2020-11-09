@@ -106,19 +106,16 @@ def retrieve_profile(request):
 def add_address(request):
     if request.method == "POST":   
         profile_id = request.POST.get(Constants.PROFILE_ID, None)
-        
+        print(request.data)
         try:
             profile_obj = Profile.objects.get(pk = profile_id)
         except Profile.DoesNotExist:
-            return Response({Constants.MESSAGE:"Profile does noit exist!"}, status = status.HTTP_404_NOT_FOUND)
-
-        data = request.data.dict()
-        data['profile'] = profile_id
-        address_serializer = AddressSerializer(data = data)        
-
+            return Response({Constants.MESSAGE:"Profile does not exist!"}, status = status.HTTP_404_NOT_FOUND)
+       
+        address_serializer = AddressSerializer(data = request.data)        
         if not address_serializer.is_valid():
             return Response(address_serializer.errors, status = status.HTTP_422_UNPROCESSABLE_ENTITY)
-        
+
         updated_address_obj = address_serializer.create()
         return Response({Constants.MESSAGE:'Address saved successfully!', Constants.ADDRESS:model_to_dict(updated_address_obj)}, status = status.HTTP_200_OK)
 
@@ -132,9 +129,9 @@ def update_address(request):
         except Address.DoesNotExist:
             return Response({Constants.MESSAGE:'Address does not exist'}, status = status.HTTP_404_NOT_FOUND)
 
-        profile_obj = address_obj.profile
+        profile_obj = address_obj.profile_id
         data = request.data.dict()
-        data['profile'] = profile_obj.pk
+        data['profile_id'] = profile_obj.pk
         address_serializer = AddressSerializer(data = data)
 
         if not address_serializer.is_valid():
@@ -153,7 +150,7 @@ def retrieve_address(request):
         except Profile.DoesNotExist:
             return Response({Constants.MESSAGE:'Profile does not exist!'}, status = status.HTTP_404_NOT_FOUND)
        
-        retrieved_addresses = Address.objects.filter(profile = profile_obj)
+        retrieved_addresses = Address.objects.filter(profile_id = profile_obj)
         retrieved_address_serializer = AddressSerializer(retrieved_addresses, many = True)
         return Response(retrieved_address_serializer.data, status = status.HTTP_200_OK)
 
