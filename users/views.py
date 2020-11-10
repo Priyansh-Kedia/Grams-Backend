@@ -86,16 +86,15 @@ def retrieve_profile(request):
     if request.method == "GET":
         profile_id = request.GET.get(Constants.PHONE_NUMBER, None)
         profile_obj = Profile.objects.get(phone_number = profile_id)
-        print(profile_obj)
         profile_serializer = ProfileSerializer(data = model_to_dict(profile_obj))
         
-        if not profile_serializer.is_valid():       
-            print(profile_serializer.errors)    
-            return Response(profile_serializer.errors, status = status.HTTP_422_UNPROCESSABLE_ENTITY)
+        # if not profile_serializer.is_valid():       
+        #     print(profile_serializer.errors)    
+        #     return Response(profile_serializer.errors, status = status.HTTP_422_UNPROCESSABLE_ENTITY)
 
-        updated_dict={Constants.ID:profile_id}
-        updated_dict.update(profile_serializer.data)
-        print(profile_serializer.data)
+        # updated_dict={Constants.ID:profile_id}
+        # updated_dict.update(profile_serializer.data)
+        # print(profile_serializer.data)
         return Response(model_to_dict(profile_obj), status = status.HTTP_200_OK)
 
 # ======================================================================================================================================= #
@@ -141,6 +140,7 @@ def retrieve_address(request):
        
         retrieved_addresses = Address.objects.filter(profile_id = profile_obj.pk)
         retrieved_address_serializer = AddressSerializer(retrieved_addresses, many = True)
+        print(retrieved_address_serializer.data)
         return Response(retrieved_address_serializer.data, status = status.HTTP_200_OK)
 
 # ======================================================================================================================================= #

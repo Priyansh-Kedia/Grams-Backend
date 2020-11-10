@@ -15,6 +15,8 @@ class AddressSerializer(serializers.ModelSerializer):
     # city = serializers.CharField(max_length = 100, required = False)
     # country = serializers.CharField(max_length = 100, required = False)
 
+    address_id = serializers.PrimaryKeyRelatedField(source='id', read_only=True)
+
     class Meta:
         model = Address
         fields = ['address', 'city', 'country', 'state', 'profile_id', 'address_id']
@@ -52,14 +54,14 @@ class AddressSerializer(serializers.ModelSerializer):
         return instance
 
 class ProfileSerializer(serializers.ModelSerializer):
-    phone_regex = RegexValidator(regex = r'^\+\d{4,15}$', message = "Phone number must be entered in the format: '+999999999'. Up to 15 digits allowed.")
-    phone_number = serializers.CharField(max_length = 17, validators = [phone_regex],required = False, allow_null=True)
-    company_name = serializers.CharField(max_length = 100, required = False, allow_null=True)
-    name = serializers.CharField(max_length = 100, required = False, allow_null=True)
-    designation = serializers.CharField(max_length = 100, required = False, allow_null=True)
-    email_id = serializers.EmailField(max_length = 100, required = False, allow_null=True)
-    is_agreed = serializers.BooleanField(required = False, allow_null=True)
-    profile_id = serializers.IntegerField(required = False, allow_null=True)
+    # phone_regex = RegexValidator(regex = r'^\+\d{4,15}$', message = "Phone number must be entered in the format: '+999999999'. Up to 15 digits allowed.")
+    # phone_number = serializers.CharField(max_length = 17, validators = [phone_regex],required = False, allow_null=True)
+    # company_name = serializers.CharField(max_length = 100, required = False, allow_null=True)
+    # name = serializers.CharField(max_length = 100, required = False, allow_null=True)
+    # designation = serializers.CharField(max_length = 100, required = False, allow_null=True)
+    # email_id = serializers.EmailField(max_length = 100, required = False, allow_null=True)
+    # is_agreed = serializers.BooleanField(required = False, allow_null=True)
+    profile_id = serializers.PrimaryKeyRelatedField(source='id', read_only=True)
 
     class Meta:
         model = Profile
