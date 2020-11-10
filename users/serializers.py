@@ -8,16 +8,16 @@ class OTPSerializer(serializers.Serializer):
     phone_number = serializers.CharField(max_length = 17, validators = [phone_regex])
 
 class AddressSerializer(serializers.ModelSerializer):
-    address_id = serializers.IntegerField(required = False)
-    profile_id = serializers.IntegerField(required = False)
-    address = serializers.CharField(max_length = 100, required = False)
-    state = serializers.CharField(max_length = 100, required = False)
-    city = serializers.CharField(max_length = 100, required = False)
-    country = serializers.CharField(max_length = 100, required = False)
+    # address_id = serializers.IntegerField(required = False)
+    # profile_id = serializers.IntegerField(required = False)
+    # address = serializers.CharField(max_length = 100, required = False)
+    # state = serializers.CharField(max_length = 100, required = False)
+    # city = serializers.CharField(max_length = 100, required = False)
+    # country = serializers.CharField(max_length = 100, required = False)
 
     class Meta:
         model = Address
-        fields = ['address_id', 'address', 'city', 'country', 'state', 'profile_id']
+        fields = ['address', 'city', 'country', 'state', 'profile_id', 'id']
     
     def first_letter_capitalized_form(self, field_value):
         if field_value is not None:

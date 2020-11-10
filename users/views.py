@@ -77,9 +77,9 @@ def update_profile(request):
 
         if not profile_serializer.is_valid():
             return Response({Constants.MESSAGE:profile_serializer.errors}, status = status.HTTP_422_UNPROCESSABLE_ENTITY)
-        
+        print(repr(profile_serializer))
         updated_profile = profile_serializer.update(instance = Profile.objects.get(pk = profile_serializer.data['profile_id']))
-        return Response({Constants.MESSAGE:'Profile updated successfully!',Constants.PROFILE:model_to_dict(updated_profile)}, status = status.HTTP_200_OK)
+        return Response(model_to_dict(updated_profile), status = status.HTTP_200_OK)
 
 @api_view(['GET',])
 def retrieve_profile(request):
@@ -119,10 +119,11 @@ def update_address(request):
         address_serializer = AddressSerializer(data = request.data)
         
         if not address_serializer.is_valid():
+            print(address_serializer.errors)
             return Response({Constants.MESSAGE:address_serializer.errors}, status = status.HTTP_422_UNPROCESSABLE_ENTITY)
         
-        updated_address = address_serializer.update(instance = Address.objects.get(pk = address_serializer.data['address_id']))
-        return Response({Constants.MESSAGE:'Address updated successfully!', Constants.ADDRESS:model_to_dict(updated_address)}, status = status.HTTP_200_OK)
+        updated_address = address_serializer.update(instance = Address.objects.get(pk = request.data['id']))
+        return Response(model_to_dict(updated_address), status = status.HTTP_200_OK)
 
 @api_view(['GET',])
 def retrieve_address(request):
@@ -134,7 +135,7 @@ def retrieve_address(request):
         except Profile.DoesNotExist:
             return Response({Constants.MESSAGE:'Profile does not exist!'}, status = status.HTTP_404_NOT_FOUND)
        
-        retrieved_addresses = Address.objects.filter(profile_id = profile_obj)
+        retrieved_addresses = Address.objects.filter(profile_id = profile_obj.pk)
         retrieved_address_serializer = AddressSerializer(retrieved_addresses, many = True)
         return Response(retrieved_address_serializer.data, status = status.HTTP_200_OK)
 
