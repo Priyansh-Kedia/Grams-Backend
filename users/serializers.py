@@ -8,20 +8,16 @@ class OTPSerializer(serializers.Serializer):
     phone_number = serializers.CharField(max_length = 17, validators = [phone_regex])
 
 class AddressSerializer(serializers.ModelSerializer):
-    # address_id = serializers.IntegerField(required = False)
-    # profile_id = serializers.IntegerField(required = False)
-    # address = serializers.CharField(max_length = 100, required = False)
-    # state = serializers.CharField(max_length = 100, required = False)
-    # city = serializers.CharField(max_length = 100, required = False)
-    # country = serializers.CharField(max_length = 100, required = False)
-
-    # address_id = serializers.PrimaryKeyRelatedField(source='id', read_only=True)
+    address = serializers.CharField(max_length = 100, required = False, allow_null = True, allow_blank = False)
+    state = serializers.CharField(max_length = 100, required = False, allow_null = True, allow_blank = False)
+    city = serializers.CharField(max_length = 100, required = False, allow_null = True, allow_blank = False)
+    country = serializers.CharField(max_length = 100, required = False, allow_null = True, allow_blank = False)
 
     class Meta:
         model = Address
         fields = ['address', 'city', 'country', 'state', 'profile_id']
         read_only_fields = ['address_id']
-    
+ 
     def first_letter_capitalized_form(self, field_value):
         if field_value is not None:
             field_value = " ".join(w.capitalize() for w in re.split('\\s+', field_value))
@@ -61,12 +57,13 @@ class ProfileSerializer(serializers.ModelSerializer):
     designation = serializers.CharField(max_length = 100, required = False, allow_null=True, allow_blank = False)
     email_id = serializers.EmailField(max_length = 100, required = False, allow_null=True, allow_blank = False)
     is_agreed = serializers.BooleanField(required = False)
-    profile_id = serializers.PrimaryKeyRelatedField(source='id', read_only=True)
+    #profile_id = serializers.PrimaryKeyRelatedField(source='id', read_only=True)
     phone_number = serializers.CharField(max_length = 17, validators = [phone_regex],required = False, allow_null=True, allow_blank = False)
 
     class Meta:
         model = Profile
-        fields = ['profile_id', 'name', 'company_name', 'name', 'email_id', 'is_agreed', 'phone_number', 'designation']
+        fields = [ 'name', 'company_name', 'name', 'email_id', 'is_agreed', 'phone_number', 'designation']
+        read_only_fields = ['profile_id']
 
     def first_letter_capitalized_form(self, field_value):
         if field_value is not None:

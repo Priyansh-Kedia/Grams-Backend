@@ -23,7 +23,7 @@ class Profile(models.Model):
 
 class Address(models.Model):
     profile_id = models.ForeignKey(to = Profile, on_delete = models.CASCADE)
-    address_id = models.IntegerField(primary_key=True, verbose_name='address_id')
+    address_id = models.AutoField(primary_key=True, verbose_name='address_id')
     address = models.CharField(max_length = 100, null = True, blank = True)
     city = models.CharField(max_length = 100, null = True, blank = True)
     state = models.CharField(max_length = 100, null = True, blank = True)
