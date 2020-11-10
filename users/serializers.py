@@ -54,14 +54,14 @@ class AddressSerializer(serializers.ModelSerializer):
         return instance
 
 class ProfileSerializer(serializers.ModelSerializer):
-    # phone_regex = RegexValidator(regex = r'^\+\d{4,15}$', message = "Phone number must be entered in the format: '+999999999'. Up to 15 digits allowed.")
-    # phone_number = serializers.CharField(max_length = 17, validators = [phone_regex],required = False, allow_null=True)
-    # company_name = serializers.CharField(max_length = 100, required = False, allow_null=True)
-    # name = serializers.CharField(max_length = 100, required = False, allow_null=True)
-    # designation = serializers.CharField(max_length = 100, required = False, allow_null=True)
-    # email_id = serializers.EmailField(max_length = 100, required = False, allow_null=True)
-    # is_agreed = serializers.BooleanField(required = False, allow_null=True)
+    phone_regex = RegexValidator(regex = r'^\+\d{4,15}$', message = "Phone number must be entered in the format: '+999999999'. Up to 15 digits allowed.")
+    company_name = serializers.CharField(max_length = 100, required = False, allow_null=True, allow_blank = False)
+    name = serializers.CharField(max_length = 100, required = False, allow_null=True, allow_blank = False)
+    designation = serializers.CharField(max_length = 100, required = False, allow_null=True, allow_blank = False)
+    email_id = serializers.EmailField(max_length = 100, required = False, allow_null=True, allow_blank = False)
+    is_agreed = serializers.BooleanField(required = False)
     profile_id = serializers.PrimaryKeyRelatedField(source='id', read_only=True)
+    phone_number = serializers.CharField(max_length = 17, validators = [phone_regex],required = False, allow_null=True, allow_blank = False)
 
     class Meta:
         model = Profile
@@ -80,11 +80,11 @@ class ProfileSerializer(serializers.ModelSerializer):
         return field_value
 
     def update(self, instance):       
-        instance.phone_number = self.validated_data.get('phone_number', instance.phone_number)
-        instance.company_name = self.first_letter_capitalized_form(self.validated_data.get('company_name', instance.company_name))
-        instance.name = self.first_letter_capitalized_form(self.validated_data.get('name', instance.name))
-        instance.designation = self.first_letter_capitalized_form(self.validated_data.get('designation', instance.designation))
-        instance.email_id = self.lowercase_form(self.validated_data.get('email_id', instance.email_id))
+        instance.phone_number = (self.validated_data['phone_number'],instance.phone_number)[self.validated_data.get('phone_number') is None]#self.validated_data.get('phone_number', None)#
+        instance.company_name = self.first_letter_capitalized_form( (self.validated_data['company_name'],instance.company_name)[self.validated_data.get('company_name') is None])
+        instance.name = self.first_letter_capitalized_form((self.validated_data['name'],instance.name)[self.validated_data.get('name') is None])
+        instance.designation = self.first_letter_capitalized_form((self.validated_data['designation'],instance.designation)[self.validated_data.get('designation') is None])
+        instance.email_id = self.lowercase_form((self.validated_data['email_id'],instance.email_id)[self.validated_data.get('email_id') is None])
         instance.is_agreed = self.validated_data.get('is_agreed', instance.is_agreed)
         instance.save()
         return instance

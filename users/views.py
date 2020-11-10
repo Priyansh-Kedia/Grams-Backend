@@ -74,11 +74,14 @@ def verify_otp(request):
 def update_profile(request):
     if request.method == "PUT":
         profile_serializer = ProfileSerializer(data = request.data)
-
+        print(request.data['profile_id'])
         if not profile_serializer.is_valid():
             return Response({Constants.MESSAGE:profile_serializer.errors}, status = status.HTTP_422_UNPROCESSABLE_ENTITY)
+        print(profile_serializer.data)
         print(repr(profile_serializer))
-        updated_profile = profile_serializer.update(instance = Profile.objects.get(pk = profile_serializer.data['profile_id']))
+        #if request.data['designation'] is None:
+        #    print("HA")
+        updated_profile = profile_serializer.update(instance = Profile.objects.get(pk = request.data['profile_id']))
         return Response(model_to_dict(updated_profile), status = status.HTTP_200_OK)
 
 @api_view(['GET',])
