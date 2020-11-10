@@ -41,8 +41,6 @@ INSTALLED_APPS = [
 
     # local apps
     'users.apps.UsersConfig',
-    'subscription.apps.SubscriptionConfig',
-    'grains.apps.GrainsConfig',
 
     # api
     'rest_framework',
