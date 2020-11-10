@@ -76,6 +76,7 @@ def update_profile(request):
         profile_serializer = ProfileSerializer(data = request.data)
 
         if not profile_serializer.is_valid():
+            print(profile_serializer.errors)
             return Response({Constants.MESSAGE:profile_serializer.errors}, status = status.HTTP_422_UNPROCESSABLE_ENTITY)
         print(repr(profile_serializer))
         updated_profile = profile_serializer.update(instance = Profile.objects.get(pk = profile_serializer.data['profile_id']))
@@ -112,7 +113,7 @@ def add_address(request):
             return Response(address_serializer.errors, status = status.HTTP_422_UNPROCESSABLE_ENTITY)
 
         updated_address_obj = address_serializer.create()
-        return Response({Constants.MESSAGE:'Address saved successfully!', Constants.ADDRESS:model_to_dict(updated_address_obj)}, status = status.HTTP_200_OK)
+        return Response(model_to_dict(updated_address_obj), status = status.HTTP_200_OK)
 
 @api_view(['PUT',])
 def update_address(request):
@@ -125,7 +126,7 @@ def update_address(request):
             print(address_serializer.errors)
             return Response({Constants.MESSAGE:address_serializer.errors}, status = status.HTTP_422_UNPROCESSABLE_ENTITY)
         
-        updated_address = address_serializer.update(instance = Address.objects.get(pk = request.data['id']))
+        updated_address = address_serializer.update(instance = Address.objects.get(pk = request.data['address_id']))
         return Response(model_to_dict(updated_address), status = status.HTTP_200_OK)
 
 @api_view(['GET',])
