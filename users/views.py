@@ -84,15 +84,19 @@ def update_profile(request):
 @api_view(['GET',])
 def retrieve_profile(request):
     if request.method == "GET":
-        profile_id = request.GET.get(Constants.PROFILE_ID, None)
+        profile_id = request.GET.get(Constants.PHONE_NUMBER, None)
+        profile_obj = Profile.objects.get(phone_number = profile_id)
+        print(profile_obj)
         profile_serializer = ProfileSerializer(data = model_to_dict(profile_obj))
         
-        if not profile_serializer.is_valid():           
+        if not profile_serializer.is_valid():       
+            print(profile_serializer.errors)    
             return Response(profile_serializer.errors, status = status.HTTP_422_UNPROCESSABLE_ENTITY)
 
         updated_dict={Constants.ID:profile_id}
         updated_dict.update(profile_serializer.data)
-        return Response(updated_dict, status = status.HTTP_200_OK)
+        print(profile_serializer.data)
+        return Response(model_to_dict(profile_obj), status = status.HTTP_200_OK)
 
 # ======================================================================================================================================= #
 

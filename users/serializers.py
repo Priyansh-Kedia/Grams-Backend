@@ -17,7 +17,7 @@ class AddressSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Address
-        fields = ['address', 'city', 'country', 'state', 'profile_id', 'id']
+        fields = ['address', 'city', 'country', 'state', 'profile_id', 'address_id']
     
     def first_letter_capitalized_form(self, field_value):
         if field_value is not None:
@@ -53,13 +53,13 @@ class AddressSerializer(serializers.ModelSerializer):
 
 class ProfileSerializer(serializers.ModelSerializer):
     phone_regex = RegexValidator(regex = r'^\+\d{4,15}$', message = "Phone number must be entered in the format: '+999999999'. Up to 15 digits allowed.")
-    phone_number = serializers.CharField(max_length = 17, validators = [phone_regex],required = False)
-    company_name = serializers.CharField(max_length = 100, required = False)
-    name = serializers.CharField(max_length = 100, required = False)
-    designation = serializers.CharField(max_length = 100, required = False)
-    email_id = serializers.EmailField(max_length = 100, required = False)
-    is_agreed = serializers.BooleanField(required = False)
-    profile_id = serializers.IntegerField(required = False)
+    phone_number = serializers.CharField(max_length = 17, validators = [phone_regex],required = False, allow_null=True)
+    company_name = serializers.CharField(max_length = 100, required = False, allow_null=True)
+    name = serializers.CharField(max_length = 100, required = False, allow_null=True)
+    designation = serializers.CharField(max_length = 100, required = False, allow_null=True)
+    email_id = serializers.EmailField(max_length = 100, required = False, allow_null=True)
+    is_agreed = serializers.BooleanField(required = False, allow_null=True)
+    profile_id = serializers.IntegerField(required = False, allow_null=True)
 
     class Meta:
         model = Profile
