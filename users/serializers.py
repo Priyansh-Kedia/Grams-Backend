@@ -8,26 +8,37 @@ class OTPSerializer(serializers.Serializer):
     phone_number = serializers.CharField(max_length = 17, validators = [phone_regex])
 
 class AddressSerializer(serializers.ModelSerializer):
-    
+    address_id = serializers.IntegerField(required = False)
+    profile_id = serializers.IntegerField(required = False)
+    address = serializers.CharField(max_length = 100, required = False)
+    state = serializers.CharField(max_length = 100, required = False)
+    city = serializers.CharField(max_length = 100, required = False)
+    country = serializers.CharField(max_length = 100, required = False)
+
     class Meta:
         model = Address
-        fields = '__all__'
+        fields = ['address_id', 'address', 'city', 'country', 'state', 'profile_id']
     
     def first_letter_capitalized_form(self, field_value):
-        field_value = " ".join(w.capitalize() for w in re.split('\\s+', field_value))
-        return field_value
+        if field_value is not None:
+            field_value = " ".join(w.capitalize() for w in re.split('\\s+', field_value))
+            return field_value
+        return field_value 
 
     def lowercase_form(self, field_value):
-        field_value = field_value.lower()
+        if field_value is not None:
+            field_value = field_value.lower()
+            return field_value
         return field_value
     
     def create(self):
         address = Address(
-            profile_id = self.validated_data["profile_id"],
-            address = self.first_letter_capitalized_form(self.validated_data["address"]),
-            city = self.first_letter_capitalized_form(self.validated_data["city"]),
-            state = self.first_letter_capitalized_form(self.validated_data["state"]),
-            country = self.first_letter_capitalized_form(self.validated_data["country"]),
+            profile_id = Profile.objects.get(pk = self.validated_data["profile_id"]),
+            address = self.first_letter_capitalized_form(self.validated_data.get("address", None)),
+            city = self.first_letter_capitalized_form(self.validated_data.get("city", None)),
+            state = self.first_letter_capitalized_form(self.validated_data.get("state", None)),
+            country = self.first_letter_capitalized_form(self.validated_data.get("country", None)),
+            
         )
         address.save()
         return address
@@ -43,22 +54,27 @@ class AddressSerializer(serializers.ModelSerializer):
 class ProfileSerializer(serializers.ModelSerializer):
     phone_regex = RegexValidator(regex = r'^\+\d{4,15}$', message = "Phone number must be entered in the format: '+999999999'. Up to 15 digits allowed.")
     phone_number = serializers.CharField(max_length = 17, validators = [phone_regex],required = False)
-    company_name = serializers.CharField(max_length = 100, required = False,allow_null = True, allow_blank = True)
-    name = serializers.CharField(max_length = 100, required = False,allow_null = True, allow_blank = True)
-    designation = serializers.CharField(max_length = 100, required = False,allow_null = True, allow_blank = True)
-    email_id = serializers.EmailField(max_length = 100, required = False,allow_null = True, allow_blank = True)
+    company_name = serializers.CharField(max_length = 100, required = False)
+    name = serializers.CharField(max_length = 100, required = False)
+    designation = serializers.CharField(max_length = 100, required = False)
+    email_id = serializers.EmailField(max_length = 100, required = False)
     is_agreed = serializers.BooleanField(required = False)
+    profile_id = serializers.IntegerField(required = False)
 
     class Meta:
         model = Profile
-        fields = ['name', 'company_name', 'name', 'email_id', 'is_agreed', 'phone_number', 'designation']
+        fields = ['profile_id', 'name', 'company_name', 'name', 'email_id', 'is_agreed', 'phone_number', 'designation']
 
     def first_letter_capitalized_form(self, field_value):
-        field_value = " ".join(w.capitalize() for w in re.split('\\s+', field_value))
+        if field_value is not None:
+            field_value = " ".join(w.capitalize() for w in re.split('\\s+', field_value))
+            return field_value
         return field_value
 
     def lowercase_form(self, field_value):
-        field_value = field_value.lower()
+        if field_value is not None:
+            field_value = field_value.lower()
+            return field_value
         return field_value
 
     def update(self, instance):       
