@@ -13,11 +13,12 @@ class AddressSerializer(serializers.ModelSerializer):
     city = serializers.CharField(max_length = 100, required = False, allow_null = True, allow_blank = False)
     country = serializers.CharField(max_length = 100, required = False, allow_null = True, allow_blank = False)
     profile_id  = serializers.PrimaryKeyRelatedField(queryset = Profile.objects.all(), required = False)
-
+    #address_id  = serializers.PrimaryKeyRelatedField(queryset = Address.objects.all(), required = False)
+    address_id = serializers.IntegerField(required = False)
+    
     class Meta:
         model = Address
-        fields = ['address', 'city', 'country', 'state','profile_id']
-        read_only_fields = ['address_id']
+        fields = ['address', 'city', 'country', 'state','profile_id', 'address_id']
  
     def first_letter_capitalized_form(self, field_value):
         if field_value is not None:

@@ -118,8 +118,7 @@ def update_address(request):
         if not address_serializer.is_valid():
             return Response({Constants.MESSAGE:address_serializer.errors}, status = status.HTTP_422_UNPROCESSABLE_ENTITY)
         
-        updated_address = address_serializer.update(instance = Address.objects.get(pk = request.data['address_id']))
-        print(repr(address_serializer))
+        updated_address = address_serializer.update(instance = Address.objects.get(pk = address_serializer.data['address_id']))
         return Response(model_to_dict(updated_address), status = status.HTTP_200_OK)
 
 @api_view(['GET',])
