@@ -12,10 +12,11 @@ class AddressSerializer(serializers.ModelSerializer):
     state = serializers.CharField(max_length = 100, required = False, allow_null = True, allow_blank = False)
     city = serializers.CharField(max_length = 100, required = False, allow_null = True, allow_blank = False)
     country = serializers.CharField(max_length = 100, required = False, allow_null = True, allow_blank = False)
+    profile_id  = serializers.PrimaryKeyRelatedField(queryset = Profile.objects.all(), required = False)
 
     class Meta:
         model = Address
-        fields = ['address', 'city', 'country', 'state', 'profile_id']
+        fields = ['address', 'city', 'country', 'state','profile_id']
         read_only_fields = ['address_id']
  
     def first_letter_capitalized_form(self, field_value):
@@ -43,10 +44,10 @@ class AddressSerializer(serializers.ModelSerializer):
         return address
 
     def update(self, instance):
-        instance.address = self.first_letter_capitalized_form(self.validated_data.get('address', instance.address))
-        instance.city = self.first_letter_capitalized_form(self.validated_data.get('city', instance.city))
-        instance.state = self.first_letter_capitalized_form(self.validated_data.get('state', instance.state))
-        instance.country = self.first_letter_capitalized_form(self.validated_data.get('country', instance.country))
+        instance.address = self.first_letter_capitalized_form( (self.validated_data['address'],instance.address)[self.validated_data.get('address') is None])
+        instance.city = self.first_letter_capitalized_form((self.validated_data['city'],instance.city)[self.validated_data.get('city') is None])
+        instance.state = self.first_letter_capitalized_form((self.validated_data['state'],instance.state)[self.validated_data.get('state') is None])
+        instance.country = self.first_letter_capitalized_form((self.validated_data['country'],instance.country)[self.validated_data.get('country') is None])
         instance.save()
         return instance
 
@@ -57,7 +58,6 @@ class ProfileSerializer(serializers.ModelSerializer):
     designation = serializers.CharField(max_length = 100, required = False, allow_null=True, allow_blank = False)
     email_id = serializers.EmailField(max_length = 100, required = False, allow_null=True, allow_blank = False)
     is_agreed = serializers.BooleanField(required = False)
-    #profile_id = serializers.PrimaryKeyRelatedField(source='id', read_only=True)
     phone_number = serializers.CharField(max_length = 17, validators = [phone_regex],required = False, allow_null=True, allow_blank = False)
 
     class Meta:
@@ -78,7 +78,7 @@ class ProfileSerializer(serializers.ModelSerializer):
         return field_value
 
     def update(self, instance):       
-        instance.phone_number = (self.validated_data['phone_number'],instance.phone_number)[self.validated_data.get('phone_number') is None]#self.validated_data.get('phone_number', None)#
+        instance.phone_number = (self.validated_data['phone_number'],instance.phone_number)[self.validated_data.get('phone_number') is None]
         instance.company_name = self.first_letter_capitalized_form( (self.validated_data['company_name'],instance.company_name)[self.validated_data.get('company_name') is None])
         instance.name = self.first_letter_capitalized_form((self.validated_data['name'],instance.name)[self.validated_data.get('name') is None])
         instance.designation = self.first_letter_capitalized_form((self.validated_data['designation'],instance.designation)[self.validated_data.get('designation') is None])
