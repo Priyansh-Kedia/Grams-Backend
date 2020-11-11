@@ -2,6 +2,7 @@
 **/__pycache__
 **/migrations
 blogs/migrations/
+users/migrations/
 # Byte-compiled / optimized / DLL files
 __pycache__/
 __pycache__
