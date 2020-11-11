@@ -73,12 +73,13 @@ def verify_otp(request):
 @api_view(['PUT',])
 def update_profile(request):
     if request.method == "PUT":
-        profile_serializer = ProfileSerializer(data = request.data)
+        profile_id = request.POST.get('profile_id')
+        profile_serializer = ProfileSerializer(data =request.data)
 
         if not profile_serializer.is_valid():
             return Response({Constants.MESSAGE:profile_serializer.errors}, status = status.HTTP_422_UNPROCESSABLE_ENTITY)
-    
-        updated_profile = profile_serializer.update(instance = Profile.objects.get(pk = request.data['profile_id']))
+        
+        updated_profile = profile_serializer.update(instance = Profile.objects.get(pk = profile_id))
         return Response(model_to_dict(updated_profile), status = status.HTTP_200_OK)
 
 @api_view(['GET',])
@@ -114,11 +115,11 @@ def add_address(request):
 def update_address(request):
     if request.method == "PUT":
         address_serializer = AddressSerializer(data = request.data)
-        
+
         if not address_serializer.is_valid():
             return Response({Constants.MESSAGE:address_serializer.errors}, status = status.HTTP_422_UNPROCESSABLE_ENTITY)
-        
-        updated_address = address_serializer.update(instance = Address.objects.get(pk = address_serializer.data['address_id']))
+
+        updated_address = address_serializer.update(instance = Address.objects.get(pk = request.data['address_id']))
         return Response(model_to_dict(updated_address), status = status.HTTP_200_OK)
 
 @api_view(['GET',])
