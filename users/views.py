@@ -132,6 +132,7 @@ def retrieve_address(request):
             return Response({Constants.MESSAGE:'Profile does not exist!'}, status = status.HTTP_404_NOT_FOUND)
 
         retrieved_addresses = Address.objects.filter(profile_id = profile_obj.pk)
+        print(retrieved_addresses[0].address_id)
         retrieved_address_serializer = AddressSerializer(retrieved_addresses, many = True)
         return Response(retrieved_address_serializer.data, status = status.HTTP_200_OK)
 

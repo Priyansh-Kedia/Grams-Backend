@@ -8,17 +8,22 @@ class OTPSerializer(serializers.Serializer):
     phone_number = serializers.CharField(max_length = 17, validators = [phone_regex])
 
 class AddressSerializer(serializers.ModelSerializer):
-    address = serializers.CharField(max_length = 100, required = False, allow_null = True, allow_blank = False)
-    state = serializers.CharField(max_length = 100, required = False, allow_null = True, allow_blank = False)
-    city = serializers.CharField(max_length = 100, required = False, allow_null = True, allow_blank = False)
-    country = serializers.CharField(max_length = 100, required = False, allow_null = True, allow_blank = False)
-    profile_id  = serializers.PrimaryKeyRelatedField(queryset = Profile.objects.all(), required = False)
+    # address = serializers.CharField(max_length = 100, required = False, allow_null = True, allow_blank = False)
+    # state = serializers.CharField(max_length = 100, required = False, allow_null = True, allow_blank = False)
+    # city = serializers.CharField(max_length = 100, required = False, allow_null = True, allow_blank = False)
+    # country = serializers.CharField(max_length = 100, required = False, allow_null = True, allow_blank = False)
+    # profile_id  = serializers.PrimaryKeyRelatedField(queryset = Profile.objects.all(), required = False)
     #address_id  = serializers.PrimaryKeyRelatedField(queryset = Address.objects.all(), required = False)
-    address_id = serializers.IntegerField(required = False)
+    #address_id = serializers.IntegerField(required = False)
+    address_id = serializers.PrimaryKeyRelatedField(read_only=True)
     
     class Meta:
         model = Address
-        fields = ['address', 'city', 'country', 'state','profile_id', 'address_id']
+        fields = ['address', 'city', 'country', 'state','profile_id','address_id']
+        read_only_fields = ['address_id']
+        extra_kwargs = {
+            'address_id': {'read_only': True}
+        }
  
     def first_letter_capitalized_form(self, field_value):
         if field_value is not None:
