@@ -73,13 +73,13 @@ def verify_otp(request):
 @api_view(['PUT',])
 def update_profile(request):
     if request.method == "PUT":
-        profile_id = request.POST.get('profile_id')
+        profile_id = request.data.get('profile_id')
         profile_serializer = ProfileSerializer(data =request.data)
 
         if not profile_serializer.is_valid():
             return Response({Constants.MESSAGE:profile_serializer.errors}, status = status.HTTP_422_UNPROCESSABLE_ENTITY)
-        
-        updated_profile = profile_serializer.update(instance = Profile.objects.get(pk = profile_id))
+
+        updated_profile = profile_serializer.update(instance = Profile.objects.get(profile_id = profile_id))
         return Response(model_to_dict(updated_profile), status = status.HTTP_200_OK)
 
 @api_view(['GET',])
