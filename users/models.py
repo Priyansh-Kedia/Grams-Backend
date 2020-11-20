@@ -34,3 +34,9 @@ class Address(models.Model):
 
     class Meta:
         verbose_name_plural = "Addresses"
+
+class Image(models.Model):
+    image = models.ImageField(upload_to = 'media/')
+    name = models.CharField(max_length=50, default='QWERTY')
+    def __str__(self):
+        return str(self.id)

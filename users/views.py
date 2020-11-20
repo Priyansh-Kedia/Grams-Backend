@@ -8,8 +8,8 @@ from django.utils import timezone
 import random
 from django.forms.models import model_to_dict
 
-from .serializers import OTPSerializer,AddressSerializer,ProfileSerializer
-from .models import Profile, Address
+from .serializers import OTPSerializer,AddressSerializer,ProfileSerializer, ImageSerializer
+from .models import Profile, Address, Image
 from grams_backend import Constants
 
 
@@ -139,3 +139,37 @@ def retrieve_address(request):
 
 
 # ======================================================================================================================================= #
+from rest_framework.decorators import parser_classes
+from rest_framework.views import APIView
+from rest_framework.parsers import MultiPartParser, FormParser
+
+@api_view(['POST',])
+@parser_classes([MultiPartParser, FormParser])
+def upload_image(request):
+    if request.method == 'POST':
+        #print(request.data)
+        #image_obj = Image.objects.create(image = request.data['image'])
+        image_serializer = ImageSerializer(data = request.data)
+        #print(model_to_dict(image_obj))
+        if not image_serializer.is_valid():
+            return Response(image_serializer.errors)
+        else:
+            print(image_serializer.data)
+        #print(repr(image_serializer))
+        print(image_serializer.validated_data['image'])
+        #print(image_obj.image)
+        return Response(image_serializer.data, status = status.HTTP_200_OK)
+
+class MyImageView(APIView):
+		# MultiPartParser AND FormParser
+		# https://www.django-rest-framework.org/api-guide/parsers/#multipartparser
+		# "You will typically want to use both FormParser and MultiPartParser
+		# together in order to fully support HTML form data."
+		#parser_classes = (MultiPartParser, FormParser)
+		def post(self, request, *args, **kwargs):
+				file_serializer = ImageSerializer(data=request.data)
+				if file_serializer.is_valid():
+						file_serializer.save()
+						return Response(file_serializer.data, status=status.HTTP_201_CREATED)
+				else:
+						return Response(file_serializer.errors, status=status.HTTP_400_BAD_REQUEST)

@@ -130,3 +130,10 @@ STATIC_URL = '/static/'
 
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 MEDIA_URL = '/media/'
+#REST_FRAMEWORK = {
+#    'DEFAULT_PARSER_CLASSES': (
+#        'rest_framework.parsers.MultiPartParser',
+#        'rest_framework.parsers.FormParser',
+#        
+#    )
+#}
