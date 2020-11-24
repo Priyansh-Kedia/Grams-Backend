@@ -1,7 +1,7 @@
 from rest_framework import serializers
 from django.core.validators import RegexValidator
 import re
-from .models import Profile, Address
+from .models import Profile, Address, Image
 
 class OTPSerializer(serializers.Serializer):
     phone_regex = RegexValidator(regex = r'^\+\d{4,15}$', message = "Phone number must be entered in the format: '+999999999'. Up to 15 digits allowed.")
@@ -82,3 +82,10 @@ class ProfileSerializer(serializers.ModelSerializer):
         instance.is_agreed = self.validated_data.get('is_agreed', instance.is_agreed)
         instance.save()
         return instance
+
+class ImageSerializer(serializers.ModelSerializer):
+
+    #image = serializers.ImageField(max_length=None, use_url=True)
+    class Meta:
+        model = Image
+        fields = '__all__'

@@ -43,6 +43,7 @@ INSTALLED_APPS = [
 
     # local apps
     'users.apps.UsersConfig',
+    'process_grains.apps.ProcessGrainsConfig',
 
     # api
     'rest_framework',
@@ -138,6 +139,14 @@ STATIC_URL = '/static/'
 
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 MEDIA_URL = '/media/'
+
+#REST_FRAMEWORK = {
+#    'DEFAULT_PARSER_CLASSES': (
+#        'rest_framework.parsers.MultiPartParser',
+#        'rest_framework.parsers.FormParser',
+#        
+#    )
+#0}
 
 CELERY_TIMEZONE = 'Asia/Kolkata'
 CELERY_BEAT_SCHEDULE = {

@@ -1,6 +1,7 @@
 from django.db import models
 from django.core.validators import RegexValidator
 
+
 phone_regex = RegexValidator(regex = r'^\+\d{4,15}$', message = "Phone number must be entered in the format: '+999999999'. Up to 15 digits allowed.")
 otp_regex = RegexValidator(regex = r'^\d{4}')
 
@@ -34,3 +35,9 @@ class Address(models.Model):
 
     class Meta:
         verbose_name_plural = "Addresses"
+
+class Image(models.Model):
+    image = models.ImageField(upload_to = 'media/')
+    name = models.CharField(max_length=50, default='QWERTY')
+    def __str__(self):
+        return str(self.id)
