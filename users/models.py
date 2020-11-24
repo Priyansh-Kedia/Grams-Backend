@@ -19,6 +19,11 @@ class Profile(models.Model):
     def __str__(self):
         return self.phone_number
 
+    @classmethod
+    def getAllScans(cls, id):
+        profile = cls(pk = id)
+        return profile.scan_set.all()        
+
     class Meta:
         verbose_name_plural = "Profiles"
 
