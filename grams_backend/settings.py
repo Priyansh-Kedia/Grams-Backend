@@ -41,6 +41,7 @@ INSTALLED_APPS = [
 
     # local apps
     'users.apps.UsersConfig',
+    'process_grains.apps.ProcessGrainsConfig',
 
     # api
     'rest_framework',
@@ -136,4 +137,4 @@ MEDIA_URL = '/media/'
 #        'rest_framework.parsers.FormParser',
 #        
 #    )
-#}
+#0}

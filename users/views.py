@@ -102,7 +102,13 @@ def retrieve_profile(request):
 
 @api_view(['POST',])
 def add_address(request):
-    if request.method == "POST":   
+    if request.method == "POST":
+        add_obj = Address(profile_id=Profile.objects.get(pk=1), address= 'TESTING')
+        print(add_obj.address)
+        add_obj.save()
+        #print(add_obj.address)  
+        #add_obj_1 = Address.objects.create(profile_id=Profile.objects.get(pk=1), address= 'kvgdsn')
+        #print(add_obj.address)
         address_serializer = AddressSerializer(data = request.data)
         
         if not address_serializer.is_valid():
@@ -152,9 +158,11 @@ def upload_image(request):
         image_serializer = ImageSerializer(data = request.data)
         #print(model_to_dict(image_obj))
         if not image_serializer.is_valid():
-            return Response(image_serializer.errors)
+                return Response(image_serializer.errors)
         else:
+            image_serializer.save()
             print(image_serializer.data)
+        
         #print(repr(image_serializer))
         print(image_serializer.validated_data['image'])
         #print(image_obj.image)
