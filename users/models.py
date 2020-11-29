@@ -20,6 +20,11 @@ class Profile(models.Model):
         return self.phone_number
 
     @classmethod
+    def getAllAddresses(cls, id):
+        profile = cls(pk = id)
+        return profile.address_set.all()
+
+    @classmethod
     def getAllScans(cls, id):
         profile = cls(pk = id)
         return profile.scan_set.all()        
@@ -37,7 +42,7 @@ class Address(models.Model):
 
     def __str__(self):
         return self.address
-
+        
     class Meta:
         verbose_name_plural = "Addresses"
 
