@@ -6,8 +6,8 @@ class Scan(models.Model):
     user = models.ForeignKey(Profile, on_delete = models.CASCADE)
     scan_id = models.CharField(max_length = 100, null = True, blank = True)
     image = models.ImageField(upload_to = 'media/', null = True, blank =True)#image will be a list field
-    category = models.CharField(max_length = 100, null = True, blank = True)
-    name = models.CharField(max_length = 100, null = True, blank = True)
+    item_type = models.CharField(max_length = 100, null = True, blank = True)
+    sub_type = models.CharField(max_length = 100, null = True, blank = True)
     created_on = models.DateTimeField(auto_now_add = True)
 
     def __str__(self):
