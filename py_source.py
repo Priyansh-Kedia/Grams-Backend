@@ -83,6 +83,27 @@ def ApplyCellpose(Image):
 	return outlines
 
 
+def FindParams(Contour):
+    ParamsList = []
+
+    # Area
+    Area = cv2.contourArea(Contour)
+    ParamsList.append(Area)
+
+    # Width and Height
+    Rect = cv2.minAreaRect(Contour)
+    ParamsList.append(Rect[1][0])       # Width
+    ParamsList.append(Rect[1][1])       # Height
+    ParamsList.append(Rect[1][0] / Rect[1][1])       # Width/Height
+
+    # Circularity
+    Perimeter = cv2.arcLength(Contour, True)
+    Circularity = 4 * np.pi * (Area / (Perimeter * Perimeter))
+    ParamsList.append(Circularity)
+
+    return ParamsList
+
+
 def py_main():
     # Reading and manipulating image
     Image = cv2.imread(InputImagePath)
@@ -102,7 +123,7 @@ def py_main():
     Contour_Dict = dict()
     
     for i in range(len(Contours)):
-        Contour_Dict[str(i)] = Contours[i].reshape( len(Contours[i]) * 2 )
+        Contour_Dict[str(i)] = FindParams(Contours[i])
     
     df = DataFrame(dict([ (k,Series(v)) for k,v in Contour_Dict.items() ]))
     df = df.T
