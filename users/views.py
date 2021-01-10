@@ -142,6 +142,8 @@ def retrieve_address(request):
 from rest_framework.decorators import parser_classes
 from rest_framework.views import APIView
 from rest_framework.parsers import MultiPartParser, FormParser
+# from py_source import py_main
+
 
 @api_view(['POST',])
 @parser_classes([MultiPartParser, FormParser])
@@ -150,7 +152,9 @@ def upload_image(request):
         #print(request.data)
         #image_obj = Image.objects.create(image = request.data['image'])
         image_serializer = ImageSerializer(data = request.data)
+        # print(py_source.CSV_name)
         #print(model_to_dict(image_obj))
+        # run py_source.py
         if not image_serializer.is_valid():
                 return Response(image_serializer.errors)
         else:
