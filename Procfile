@@ -1,1 +1,1 @@
-web: gunicorn grams_backend.wsgi --log-file -
+web: gunicorn grams_backend.wsgi:application --log-file -
