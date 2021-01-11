@@ -1,8 +1,8 @@
 
-**/__pycache__
-**/migrations
-blogs/migrations/
-users/migrations/
+#**/__pycache__
+#**/migrations
+#blogs/migrations/
+#users/migrations/
 # Byte-compiled / optimized / DLL files
 __pycache__/
 __pycache__
@@ -113,7 +113,7 @@ media/
 *.pyc
 *.db
 *.pid
-# django migrations 
+# django migrations
 # **/migrations/**
 # !**/migrations
 # !**/migrations/__init__.py
@@ -121,6 +121,6 @@ media/
 # db.sqlite3
 
 
-# Output csv and image 
+# Output csv and image
 /Numbered.jpg
 /ContoursFound.csv
