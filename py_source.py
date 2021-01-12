@@ -1,3 +1,4 @@
+# Params returned are: Area, Width, Length, Width/Length, Circularity
 '''
 pip install opencv-python
 pip install cellpose
@@ -94,7 +95,7 @@ def FindParams(Contour):
     return ParamsList
 
 
-def py_main(InputImagePath, CSV_name, Rescale_Factor, Diameter):
+def py_main(Image, Rescale_Factor, Diameter):
 
     # Global variables shifted here
     use_GPU = core.use_gpu()
@@ -105,11 +106,11 @@ def py_main(InputImagePath, CSV_name, Rescale_Factor, Diameter):
 
 
     # Reading and manipulating image
-    Image = cv2.imread(InputImagePath)
+    #Image = cv2.imread(InputImagePath)
     print("Image shape: {}".format(Image.shape[:2]))
     
     Image = cv2.resize(Image, (0, 0), fx=Rescale_Factor, fy=Rescale_Factor)
-    Image = cv2.fastNlMeansDenoisingColored(Image, None, 10, 10, 7, 21)
+    #Image = cv2.fastNlMeansDenoisingColored(Image, None, 10, 10, 7, 21)
     
     # Applying Cellpose
     Contours = ApplyCellpose(Model, Image, Diameter)
@@ -121,13 +122,13 @@ def py_main(InputImagePath, CSV_name, Rescale_Factor, Diameter):
     for i in range(len(Contours)):
         Contour_Dict[str(i)] = FindParams(Contours[i])
     
-    df = DataFrame(dict([ (k,Series(v)) for k,v in Contour_Dict.items() ]))
+    '''df = DataFrame(dict([ (k,Series(v)) for k,v in Contour_Dict.items() ]))
     df = df.T
     df.to_csv(CSV_name, header=False, index=False) 
-    
+    '''
     print(t.time() - t1)
     
     return Contour_Dict
 
 
-#py_main("Wheat.jpg", "ContoursFound.csv", 0.25, 20)
+#print(py_main(cv2.imread("Wheat.jpg"), 0.25, 20))
