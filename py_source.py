@@ -27,12 +27,10 @@ mpl.rcParams['figure.dpi'] = 300
 
 import mxnet as mx
 
-use_GPU = core.use_gpu()
-print('GPU activated? %d'%use_GPU)
 
 t1 = t.time()
 
-########################################################################################################
+'''########################################################################################################
 InputImagePath = "Wheat.jpg"
 CSV_name = "ContoursFound.csv"      # If changed, change this file name in .gitignore too.
 
@@ -42,14 +40,7 @@ Rescale_Factor = 0.25		# Image will be resized by this value.
 Diameter = 20
 ########################################################################################################
 
-
-# model_type='cyto' or model_type='nuclei'
-Model = models.Cellpose(gpu=use_GPU, model_type='cyto', net_avg=False)
-
-img = None
-cont = None
-
-
+'''
 
 def NumberGrain(BlueSheet, Contours, StartingIndex=0):
     Font = cv2.FONT_HERSHEY_SIMPLEX
@@ -70,15 +61,14 @@ def NumberGrain(BlueSheet, Contours, StartingIndex=0):
     return BlueSheetCopy1
 
 
-def ApplyCellpose(Image):
+def ApplyCellpose(Model, Image, Diameter):
 	
 	masks, flows, styles, diams = Model.eval(Image, diameter=Diameter, channels=[0, 0], do_3D=False)
 	
 	outlines = cellpose.utils.outlines_list(masks)
 
-	Numbered = NumberGrain(Image, outlines, StartingIndex=1)
-
-	cv2.imwrite("Numbered.jpg", Numbered)
+	#Numbered = NumberGrain(Image, outlines, StartingIndex=1)
+	#cv2.imwrite("Numbered.jpg", Numbered)
  	
 	return outlines
 
@@ -90,11 +80,11 @@ def FindParams(Contour):
     Area = cv2.contourArea(Contour)
     ParamsList.append(Area)
 
-    # Width and Height
+    # Width and Length
     Rect = cv2.minAreaRect(Contour)
     ParamsList.append(Rect[1][0])       # Width
-    ParamsList.append(Rect[1][1])       # Height
-    ParamsList.append(Rect[1][0] / Rect[1][1])       # Width/Height
+    ParamsList.append(Rect[1][1])       # Length
+    ParamsList.append(Rect[1][0] / Rect[1][1])       # Width/Length
 
     # Circularity
     Perimeter = cv2.arcLength(Contour, True)
@@ -104,7 +94,16 @@ def FindParams(Contour):
     return ParamsList
 
 
-def py_main():
+def py_main(InputImagePath, CSV_name, Rescale_Factor, Diameter):
+
+    # Global variables shifted here
+    use_GPU = core.use_gpu()
+    print('GPU activated? %d'%use_GPU)
+
+    # model_type='cyto' or model_type='nuclei'
+    Model = models.Cellpose(gpu=use_GPU, model_type='cyto', net_avg=False)
+
+
     # Reading and manipulating image
     Image = cv2.imread(InputImagePath)
     print("Image shape: {}".format(Image.shape[:2]))
@@ -113,13 +112,10 @@ def py_main():
     Image = cv2.fastNlMeansDenoisingColored(Image, None, 10, 10, 7, 21)
     
     # Applying Cellpose
-    global img, cont
-    img = Image
-    Contours = ApplyCellpose(Image)
+    Contours = ApplyCellpose(Model, Image, Diameter)
     print("Number of Contours: " + str(len(Contours)))
     
     # Storing data in csv
-    cont = Contours
     Contour_Dict = dict()
     
     for i in range(len(Contours)):
@@ -130,6 +126,8 @@ def py_main():
     df.to_csv(CSV_name, header=False, index=False) 
     
     print(t.time() - t1)
+    
+    return Contour_Dict
 
 
-py_main()
+#py_main("Wheat.jpg", "ContoursFound.csv", 0.25, 20)
