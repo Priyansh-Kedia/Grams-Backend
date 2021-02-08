@@ -12,6 +12,7 @@ https://docs.djangoproject.com/en/3.1/ref/settings/
 
 from pathlib import Path
 import os
+import django_heroku
 
 from celery.schedules import crontab
 
@@ -26,7 +27,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = 'bzrkkx1@u^-l@+vi7!zgkzpan(s-c=h4vfg$z+*+*(e20@62=n'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = False
+DEBUG = True
 
 ALLOWED_HOSTS = ['*']
 
@@ -160,3 +161,5 @@ CELERY_BEAT_SCHEDULE = {
 # Specifies to use same database as django
 CELERY_RESULT_BACKEND = 'django-db'
 CELERY_CACHE_BACKEND = 'django-cache'
+
+django_heroku.settings(locals())
