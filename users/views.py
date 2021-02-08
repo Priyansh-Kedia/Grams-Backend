@@ -144,7 +144,8 @@ from rest_framework.views import APIView
 from rest_framework.parsers import MultiPartParser, FormParser
 # from py_source import py_main
 
-
+from grams_backend.py_source import py_main
+import requests
 @api_view(['POST',])
 @parser_classes([MultiPartParser, FormParser])
 def upload_image(request):
@@ -152,19 +153,28 @@ def upload_image(request):
         #print(request.data)
         #image_obj = Image.objects.create(image = request.data['image'])
         image_serializer = ImageSerializer(data = request.data)
+        data = {    "app_id": "fad6e42a-0b02-45d6-9ab0-a654b204aca9",    "included_segments": ["All"],    "contents": {"en": "Hello"}}
+
+        requests.post(    "https://onesignal.com/api/v1/notifications",    headers={"Authorization": "Basic NDJkOGMyZDQtMjgyYi00Y2JkLWFjZTgtZGQ2NjQ1NDUwNzg3"}, json=data)
         # print(py_source.CSV_name)
         #print(model_to_dict(image_obj))
         # run py_source.py
+        # py_main()
         if not image_serializer.is_valid():
                 return Response(image_serializer.errors)
         else:
-            image_serializer.save()
+            image_serializer.save() 
             print(image_serializer.data)
-        
+        #  image_serializer.data['image']
+        csv_file = py_main(Image = request.data['image'] , Rescale_Factor = 1, Diameter = 20)# 20 for wheat rf = 1 if image is small
         #print(repr(image_serializer))
-        print(image_serializer.validated_data['image'])
+        # print(image_serializer.validated_data['image'])
         #print(image_obj.image)
-        return Response(image_serializer.data, status = status.HTTP_200_OK)
+        data = {
+            'data': image_serializer.data,
+            'csv': csv_file
+        }
+        return Response(data, status = status.HTTP_200_OK)
 
 class MyImageView(APIView):
 		# MultiPartParser AND FormParser

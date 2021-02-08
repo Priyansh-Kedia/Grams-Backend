@@ -11,7 +11,9 @@ pip install mxnet-cu101
 import cv2
 import numpy as np
 import cellpose
-from cellpose import utils, core, models
+from cellpose import utils
+from cellpose import core
+from cellpose import models
 import time as t
 from pandas import DataFrame, Series
 
@@ -19,18 +21,17 @@ from pandas import DataFrame, Series
 import time, os, sys
 from urllib.parse import urlparse
 #import skimage.io
-#import matplotlib.pyplot as plt
-#import matplotlib as mpl
+import matplotlib.pyplot as plt
+import matplotlib as mpl
 #%matplotlib inline
-#mpl.rcParams['figure.dpi'] = 300
+mpl.rcParams['figure.dpi'] = 300
 
-#import mxnet as mx
+# import mxnet as mx
 
 
 t1 = t.time()
 
-'''
-########################################################################################################
+'''########################################################################################################
 InputImagePath = "Wheat.jpg"
 CSV_name = "ContoursFound.csv"      # If changed, change this file name in .gitignore too.
 
@@ -84,7 +85,7 @@ def FindParams(Contour):
     Rect = cv2.minAreaRect(Contour)
     ParamsList.append(Rect[1][0])       # Width
     ParamsList.append(Rect[1][1])       # Length
-    ParamsList.append(Rect[1][0] / Rect[1][1])       # Width/Length
+    # ParamsList.append(Rect[1][0] /Rect[1][1])       # Width/Length
 
     # Circularity
     Perimeter = cv2.arcLength(Contour, True)
@@ -93,9 +94,9 @@ def FindParams(Contour):
 
     return ParamsList
 
-
 from PIL import Image as P_Image
 from numpy import asarray 
+
 def py_main(Image, Rescale_Factor, Diameter):
 
     # Global variables shifted here
@@ -105,10 +106,13 @@ def py_main(Image, Rescale_Factor, Diameter):
     # model_type='cyto' or model_type='nuclei'
     Model = models.Cellpose(gpu=use_GPU, model_type='cyto', net_avg=False)
 
+
     # Reading and manipulating image
-        
+    #Image = cv2.imread(InputImagePath)
+    # Image = cv2.imdecode(np.fromstring(Image, np.uint8), cv2.IMREAD_COLOR)
     Image = P_Image.open(Image) 
     Image = asarray(Image)
+
     print("Image shape: {}".format(Image.shape[:2]))
     
     Image = cv2.resize(Image, (0, 0), fx=Rescale_Factor, fy=Rescale_Factor)
