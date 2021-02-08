@@ -55,11 +55,11 @@ PyWavelets==1.1.1
 requests==2.18.4
 requests-toolbelt==0.9.1
 s3transfer==0.3.3
-scikit-image==0.17.4
+scikit-image==0.17.2
 scipy==1.6.0
 six==1.15.0
 sqlparse==0.4.1
-tifffile==2021.1.14
+tifffile==2020.9.3
 torch==1.7.1
 tornado==6.1
 tqdm==4.56.0
