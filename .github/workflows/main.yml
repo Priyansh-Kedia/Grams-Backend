@@ -42,6 +42,16 @@ jobs:
         run: |
           python test_application.py
           
+      - name: Deploy to EB
+        uses: einaregilsson/beanstalk-deploy@v16
+        with:
+          aws_access_key: "AKIAIYNJERXU3NVEW2IQ"
+          aws_secret_key: "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"
+          application_name: grams_app_prod
+          environment_name: grams_app_prod
+          version_label: 12345
+          region: us-east-1
+          
   deploy-to-test:
     # Only run this job if "build" has ended successfully
     needs:
@@ -95,8 +105,8 @@ jobs:
       # Create the Elastic Beanstalk application
       - name: Create EBS application
         run: |
-          eb init -p python-3.8 hello-world --region us-east-1
+          eb init -p python-3.8 grams_app_prod --region us-east-1
       # Create the Elastic Beanstalk environment
       - name: Create test environment
         run: |
-          eb create grams-environment
+          eb create grams_app_prod
