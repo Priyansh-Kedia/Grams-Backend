@@ -48,8 +48,8 @@ jobs:
           aws_access_key: "AKIAIYNJERXU3NVEW2IQ"
           aws_secret_key: "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"
           application_name: grams_app_prod
-          environment_name: grams_app_prod
-          version_label: 12345
+          environment_name: gramsappprodnew
+          version_label: app-377c-210222_200543
           region: us-east-1
           
   deploy-to-test:
