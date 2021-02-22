@@ -77,3 +77,15 @@ jobs:
           python -m pip install --upgrade pip
           pip install awsebcli --upgrade
           eb --version
+          
+  aws-deplo-yement:
+  
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-access-key-id: "AKIAIYNJERXU3NVEW2IQ"
+          aws-secret-access-key: "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"
+          aws-region: us-east-1
