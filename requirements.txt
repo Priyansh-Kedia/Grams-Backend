@@ -47,16 +47,13 @@ pathspec==0.5.9
 Pillow==8.0.1
 prometheus-client==0.8.0
 prompt-toolkit==3.0.8
-psycopg2==2.8.6
 Pygments==2.7.2
 pyparsing==2.4.7
-pypiwin32==223
 PySocks==1.7.1
 python-crontab==2.5.1
 python-dateutil==2.8.1
 pytz==2020.4
 PyWavelets==1.1.1
-pywin32==300
 PyYAML==5.3.1
 requests==2.24.0
 requests-toolbelt==0.9.1
