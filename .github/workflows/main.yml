@@ -39,3 +39,41 @@ jobs:
       - name: Run unit tests
         run: |
           python test_application.py
+          
+  deploy-to-test:
+    # Only run this job if "build" has ended successfully
+    needs:
+      - build
+      
+    runs-on: ubuntu-latest
+
+    steps:
+      # Checks-out your repository under $GITHUB_WORKSPACE
+      - uses: actions/checkout@v2
+
+      # Set up Python 3.6 environment
+      - name: Set up Python 3.6
+        uses: actions/setup-python@v1
+        with:
+          python-version: "3.6"
+
+      # Set up cache for pip
+      - name: Get pip cache dir
+        id: pip-cache
+        run: |
+          echo "::set-output name=dir::$(pip cache dir)"
+
+      - name: Cache pip
+        uses: actions/cache@v1
+        with:
+          path: ${{ steps.pip-cache.outputs.dir }}
+          key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements.txt') }}
+          restore-keys: |
+            ${{ runner.os }}-pip-
+
+      # Elastic Beanstalk CLI version
+      - name: Get EB CLI version
+        run: |
+          python -m pip install --upgrade pip
+          pip install awsebcli --upgrade
+          eb --version
