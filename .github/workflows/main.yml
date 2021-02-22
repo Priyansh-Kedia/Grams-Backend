@@ -89,3 +89,12 @@ jobs:
           aws-access-key-id: "AKIAIYNJERXU3NVEW2IQ"
           aws-secret-access-key: "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"
           aws-region: us-east-1
+
+      # Create the Elastic Beanstalk application
+      - name: Create EBS application
+        run: |
+          eb init -p python-3.6 hello-world --region us-east-1
+      # Create the Elastic Beanstalk environment
+      - name: Create test environment
+        run: |
+          eb create grams-environment
