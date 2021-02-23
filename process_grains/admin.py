@@ -4,4 +4,3 @@ from .models import Scan
 
 admin.site.register(Scan)
 
-# Register your models here.
