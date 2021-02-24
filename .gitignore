@@ -124,3 +124,8 @@ media/
 # Output csv and image
 /Numbered.jpg
 /ContoursFound.csv
+
+# Elastic Beanstalk Files
+.elasticbeanstalk/*
+!.elasticbeanstalk/*.cfg.yml
+!.elasticbeanstalk/*.global.yml
