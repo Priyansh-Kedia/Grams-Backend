@@ -166,13 +166,13 @@ def upload_image(request):
             image_serializer.save() 
             print(image_serializer.data)
         #  image_serializer.data['image']
-        csv_file = py_main(Image = request.data['image'] , Rescale_Factor = 1, Diameter = 20)# 20 for wheat rf = 1 if image is small
+        # csv_file = py_main(Image = request.data['image'] , Rescale_Factor = 1, Diameter = 20)# 20 for wheat rf = 1 if image is small
         #print(repr(image_serializer))
         # print(image_serializer.validated_data['image'])
         #print(image_obj.image)
         data = {
             'data': image_serializer.data,
-            'csv': csv_file
+            # 'csv': csv_file
         }
         return Response(data, status = status.HTTP_200_OK)
 
