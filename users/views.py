@@ -144,7 +144,6 @@ from rest_framework.views import APIView
 from rest_framework.parsers import MultiPartParser, FormParser
 # from py_source import py_main
 
-from grams_backend.py_source import py_main
 import requests
 @api_view(['POST',])
 @parser_classes([MultiPartParser, FormParser])
