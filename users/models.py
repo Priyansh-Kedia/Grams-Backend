@@ -29,7 +29,9 @@ class Profile(models.Model):
         profile = cls.objects.get(phone_number = phone_number)
         # print(profile)
         # print(profile.scan_set.all())
-        return profile.scan_set.all()        
+        return profile.scan_set.all() 
+
+
 
     class Meta:
         verbose_name_plural = "Profiles"

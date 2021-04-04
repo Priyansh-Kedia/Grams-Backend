@@ -5,7 +5,7 @@ from users.models import Profile
 class Scan(models.Model):
     user = models.ForeignKey(Profile, on_delete = models.CASCADE)
     scan_id = models.CharField(max_length = 100, null = True, blank = True)
-    image = models.ImageField(upload_to = 'media/', null = True, blank =True)#image will be a list field
+    image = models.ImageField(upload_to = 'media/', null = True, blank =True)
     item_type = models.CharField(max_length = 100, null = True, blank = True)
     sub_type = models.CharField(max_length = 100, null = True, blank = True)
     created_on = models.DateTimeField(auto_now_add = True)
@@ -20,5 +20,10 @@ class Scan(models.Model):
 
     def __str__(self):
         return str(self.id)
+
+    @classmethod
+    def getPhoneNumberByUser(cls, user):
+        phone_number = cls.objects.filter(user = user)[0].user.phone_number
+        return phone_number
 
 # Create your models here.

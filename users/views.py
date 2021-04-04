@@ -12,6 +12,7 @@ from .serializers import OTPSerializer,AddressSerializer,ProfileSerializer, Imag
 from process_grains.serializers import ScanSerializer
 
 from .models import Profile, Address, Image
+from process_grains.models import Scan
 from grams_backend import Constants
 
 
@@ -152,14 +153,14 @@ import requests
 @parser_classes([MultiPartParser, FormParser])
 def upload_image(request):
     if request.method == 'POST':
-        print("jijipj")
         #print(request.data)
         #image_obj = Image.objects.create(image = request.data['image'])
         # image_serializer = ImageSerializer(data = request.data)
-        phone_number = request.POST.get('phone_number')
-        print(phone_number)
-        phone_number  = '+919521152961'
-        data = {    "app_id": "fad6e42a-0b02-45d6-9ab0-a654b204aca9", "contents": {"en": "Hello"}, "headings": {"en": "world"}, "include_phone_numbers": [phone_number], "sms_from": "+919521152961"}
+        # phone_number = request.POST.get('phone_number')
+        phone_number = Scan.getPhoneNumberByUser(user = request.user.pk) #Profile.objects.get(user = request.user).phone_number
+        # print(phone_number)
+        # phone_number  = '+919521152961'
+        data = {    "app_id": "fad6e42a-0b02-45d6-9ab0-a654b204aca9", "contents": {"en": "world"}, "headings": {"en": "hello"}, "include_external_user_ids": [phone_number] , "chrome_web_image": "https://images.ctfassets.net/hrltx12pl8hq/7yQR5uJhwEkRfjwMFJ7bUK/dc52a0913e8ff8b5c276177890eb0129/offset_comp_772626-opt.jpg?fit=fill&w=800&h=300"}
 
         requests.post(    "https://onesignal.com/api/v1/notifications",    headers={"Authorization": "Basic NDJkOGMyZDQtMjgyYi00Y2JkLWFjZTgtZGQ2NjQ1NDUwNzg3"}, json=data)
         print("jijipj")
