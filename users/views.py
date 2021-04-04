@@ -159,7 +159,7 @@ def upload_image(request):
         phone_number = request.POST.get('phone_number')
         print(phone_number)
         phone_number  = '+919521152961'
-        data = {    "app_id": "fad6e42a-0b02-45d6-9ab0-a654b204aca9", "contents": {"en": "Hello"}, "headings": {"en": "world"}, "include_phone_numbers": [phone_number], "sms_from": "+919521152961",}
+        data = {    "app_id": "fad6e42a-0b02-45d6-9ab0-a654b204aca9", "contents": {"en": "Hello"}, "headings": {"en": "world"}, "include_phone_numbers": [phone_number], "sms_from": "+919521152961"}
 
         requests.post(    "https://onesignal.com/api/v1/notifications",    headers={"Authorization": "Basic NDJkOGMyZDQtMjgyYi00Y2JkLWFjZTgtZGQ2NjQ1NDUwNzg3"}, json=data)
         print("jijipj")
