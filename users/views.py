@@ -9,6 +9,8 @@ import random
 from django.forms.models import model_to_dict
 
 from .serializers import OTPSerializer,AddressSerializer,ProfileSerializer, ImageSerializer
+from process_grains.serializers import ScanSerializer
+
 from .models import Profile, Address, Image
 from grams_backend import Constants
 
@@ -143,34 +145,55 @@ from rest_framework.decorators import parser_classes
 from rest_framework.views import APIView
 from rest_framework.parsers import MultiPartParser, FormParser
 # from py_source import py_main
+from mock import mock
 
 import requests
 @api_view(['POST',])
 @parser_classes([MultiPartParser, FormParser])
 def upload_image(request):
     if request.method == 'POST':
+        print("jijipj")
         #print(request.data)
         #image_obj = Image.objects.create(image = request.data['image'])
-        image_serializer = ImageSerializer(data = request.data)
-        data = {    "app_id": "fad6e42a-0b02-45d6-9ab0-a654b204aca9",    "included_segments": ["All"],    "contents": {"en": "Hello"}}
+        # image_serializer = ImageSerializer(data = request.data)
+        phone_number = request.POST.get('phone_number')
+        # phone_number  = '+919521152961'
+        data = {    "app_id": "fad6e42a-0b02-45d6-9ab0-a654b204aca9", "contents": {"en": "Hello"}, "headings": {"en": "world"}, "include_phone_numbers": [phone_number]}
 
         requests.post(    "https://onesignal.com/api/v1/notifications",    headers={"Authorization": "Basic NDJkOGMyZDQtMjgyYi00Y2JkLWFjZTgtZGQ2NjQ1NDUwNzg3"}, json=data)
+        print("jijipj")
         # print(py_source.CSV_name)
         #print(model_to_dict(image_obj))
         # run py_source.py
         # py_main()
-        if not image_serializer.is_valid():
-                return Response(image_serializer.errors)
-        else:
-            image_serializer.save() 
-            print(image_serializer.data)
+        # if not image_serializer.is_valid():
+        #         return Response(image_serializer.errors)
+        # else:
+        #     image_serializer.save() 
+        #     print(image_serializer.data)
         #  image_serializer.data['image']
         # csv_file = py_main(Image = request.data['image'] , Rescale_Factor = 1, Diameter = 20)# 20 for wheat rf = 1 if image is small
         #print(repr(image_serializer))
         # print(image_serializer.validated_data['image'])
         #print(image_obj.image)
+        image_obj = Image.objects.create(image = request.data['image'])
+        # print(image_obj.image)
+        # print(request.data)
+        ml_data = mock()
+        ml_data['user'] = request.user.pk
+        ml_data['image'] = image_obj.image
+        # print(ml_data)
+
+        scan_serializer = ScanSerializer(data = ml_data)
+
+        if not scan_serializer.is_valid():
+            # print(scan_serializer.errors)
+            return Response(scan_serializer.errors)
+        
+        scan_serializer.save()
+
         data = {
-            'data': image_serializer.data,
+            'data': scan_serializer.data,
             # 'csv': csv_file
         }
         return Response(data, status = status.HTTP_200_OK)
