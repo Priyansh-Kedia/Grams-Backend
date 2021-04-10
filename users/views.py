@@ -34,6 +34,10 @@ def generate_otp(request):
         except Profile.DoesNotExist:
             user_profile = Profile.objects.create(phone_number = phone_number)
 
+        
+        url = "https://2factor.in/API/V1/7125245b-99cb-11eb-80ea-0200cd936042/SMS/" + phone_number + "/" + str(otp)
+        requests.post( url )
+
         if user_profile:
             user_profile.otp = otp
             user_profile.save()          
@@ -163,7 +167,9 @@ def upload_image(request):
         data = {    "app_id": "fad6e42a-0b02-45d6-9ab0-a654b204aca9", "contents": {"en": "world"}, "headings": {"en": "hello"}, "include_external_user_ids": [phone_number] , "chrome_web_image": "https://images.ctfassets.net/hrltx12pl8hq/7yQR5uJhwEkRfjwMFJ7bUK/dc52a0913e8ff8b5c276177890eb0129/offset_comp_772626-opt.jpg?fit=fill&w=800&h=300"}
 
         requests.post(    "https://onesignal.com/api/v1/notifications",    headers={"Authorization": "Basic NDJkOGMyZDQtMjgyYi00Y2JkLWFjZTgtZGQ2NjQ1NDUwNzg3"}, json=data)
-        print("jijipj")
+        
+        # requests.post(    "https://onesignal.com/api/v1/notifications",    headers={"Authorization": "Basic NDJkOGMyZDQtMjgyYi00Y2JkLWFjZTgtZGQ2NjQ1NDUwNzg3"}, json=data)
+
         # print(py_source.CSV_name)
         #print(model_to_dict(image_obj))
         # run py_source.py
