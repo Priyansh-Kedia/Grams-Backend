@@ -155,12 +155,14 @@ from mock import mock
 import requests
 @api_view(['POST',])
 @parser_classes([MultiPartParser, FormParser])
-def upload_image(request):
+def upload_image(request, phone_number):
     if request.method == 'POST':
         #print(request.data)
         #image_obj = Image.objects.create(image = request.data['image'])
         # image_serializer = ImageSerializer(data = request.data)
-        phone_number = request.POST.get(Constants.PHONE_NUMBER)
+        # print(phone_number)
+        print(phone_number)
+        # phone_number = request.POST.get(Constants.PHONE_NUMBER)
         # phone_number = Scan.getPhoneNumberByUser(user = request.user.pk) #Profile.objects.get(user = request.user).phone_number
         # print(phone_number)
         # phone_number  = '+919521152961'
