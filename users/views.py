@@ -160,8 +160,8 @@ def upload_image(request):
         #print(request.data)
         #image_obj = Image.objects.create(image = request.data['image'])
         # image_serializer = ImageSerializer(data = request.data)
-        # phone_number = request.POST.get('phone_number')
-        phone_number = Scan.getPhoneNumberByUser(user = request.user.pk) #Profile.objects.get(user = request.user).phone_number
+        phone_number = request.POST.get(Constants.PHONE_NUMBER)
+        # phone_number = Scan.getPhoneNumberByUser(user = request.user.pk) #Profile.objects.get(user = request.user).phone_number
         # print(phone_number)
         # phone_number  = '+919521152961'
         data = {    "app_id": "fad6e42a-0b02-45d6-9ab0-a654b204aca9", "contents": {"en": "world"}, "headings": {"en": "hello"}, "include_external_user_ids": [phone_number] , "chrome_web_image": "https://images.ctfassets.net/hrltx12pl8hq/7yQR5uJhwEkRfjwMFJ7bUK/dc52a0913e8ff8b5c276177890eb0129/offset_comp_772626-opt.jpg?fit=fill&w=800&h=300"}
@@ -188,7 +188,9 @@ def upload_image(request):
         # print(image_obj.image)
         # print(request.data)
         ml_data = mock()
-        ml_data['user'] = request.user.pk
+        profile = Profile.objects.get(phone_number = phone_number)
+        ml_data['user'] = profile.pk
+        print(profile.pk)
         ml_data['image'] = image_obj.image
         # print(ml_data)
 
