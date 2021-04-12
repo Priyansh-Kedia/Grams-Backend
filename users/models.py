@@ -25,8 +25,8 @@ class Profile(models.Model):
         return profile.address_set.all()
 
     @classmethod
-    def getAllScans(cls, phone_number):
-        profile = cls.objects.get(phone_number = phone_number)
+    def getAllScans(cls, user_id):
+        profile = cls.objects.get(pk = user_id)
         # print(profile)
         # print(profile.scan_set.all())
         return profile.scan_set.all() 

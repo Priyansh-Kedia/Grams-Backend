@@ -153,22 +153,26 @@ from rest_framework.parsers import MultiPartParser, FormParser
 from mock import mock
 
 import requests
+from urllib.parse import unquote
+
 @api_view(['POST',])
 @parser_classes([MultiPartParser, FormParser])
 def upload_image(request, phone_number):
     if request.method == 'POST':
+
         #print(request.data)
         #image_obj = Image.objects.create(image = request.data['image'])
         # image_serializer = ImageSerializer(data = request.data)
         # print(phone_number)
-        print(phone_number)
+        # print(unquote(phone_number))
+        # phone_number = unquote(phone_number)
         # phone_number = request.POST.get(Constants.PHONE_NUMBER)
         # phone_number = Scan.getPhoneNumberByUser(user = request.user.pk) #Profile.objects.get(user = request.user).phone_number
         # print(phone_number)
         # phone_number  = '+919521152961'
-        data = {    "app_id": "fad6e42a-0b02-45d6-9ab0-a654b204aca9", "contents": {"en": "world"}, "headings": {"en": "hello"}, "include_external_user_ids": [phone_number] , "chrome_web_image": "https://images.ctfassets.net/hrltx12pl8hq/7yQR5uJhwEkRfjwMFJ7bUK/dc52a0913e8ff8b5c276177890eb0129/offset_comp_772626-opt.jpg?fit=fill&w=800&h=300"}
-
-        requests.post(    "https://onesignal.com/api/v1/notifications",    headers={"Authorization": "Basic NDJkOGMyZDQtMjgyYi00Y2JkLWFjZTgtZGQ2NjQ1NDUwNzg3"}, json=data)
+        profile = Profile.objects.get(phone_number = phone_number)
+        
+        
         
         # requests.post(    "https://onesignal.com/api/v1/notifications",    headers={"Authorization": "Basic NDJkOGMyZDQtMjgyYi00Y2JkLWFjZTgtZGQ2NjQ1NDUwNzg3"}, json=data)
 
@@ -190,7 +194,7 @@ def upload_image(request, phone_number):
         # print(image_obj.image)
         # print(request.data)
         ml_data = mock()
-        profile = Profile.objects.get(phone_number = phone_number)
+        
         ml_data['user'] = profile.pk
         print(profile.pk)
         ml_data['image'] = image_obj.image
@@ -198,11 +202,20 @@ def upload_image(request, phone_number):
 
         scan_serializer = ScanSerializer(data = ml_data)
 
+        print(scan_serializer.data['scan_id'])
+
         if not scan_serializer.is_valid():
             # print(scan_serializer.errors)
             return Response(scan_serializer.errors)
         
         scan_serializer.save()
+
+
+        heading_msg = "Your Reading is " + scan_id
+        content_msg = "Your Reading has been successfully computed."
+        data = {    "app_id": "fad6e42a-0b02-45d6-9ab0-a654b204aca9", "contents": {"en": content_msg}, "headings": {"en": heading_msg}, "include_external_user_ids": [phone_number] , "chrome_web_image": "https://images.ctfassets.net/hrltx12pl8hq/7yQR5uJhwEkRfjwMFJ7bUK/dc52a0913e8ff8b5c276177890eb0129/offset_comp_772626-opt.jpg?fit=fill&w=800&h=300"}
+
+        requests.post(    "https://onesignal.com/api/v1/notifications",    headers={"Authorization": "Basic NDJkOGMyZDQtMjgyYi00Y2JkLWFjZTgtZGQ2NjQ1NDUwNzg3"}, json=data)
 
         data = {
             'data': scan_serializer.data,
