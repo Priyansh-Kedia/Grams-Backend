@@ -202,16 +202,20 @@ def upload_image(request, phone_number):
 
         scan_serializer = ScanSerializer(data = ml_data)
 
-        print(scan_serializer.data['scan_id'])
+        
 
         if not scan_serializer.is_valid():
             # print(scan_serializer.errors)
             return Response(scan_serializer.errors)
+
+        
         
         scan_serializer.save()
 
+        # print(scan_serializer.data['scan_id'])
 
-        heading_msg = "Your Reading is " + scan_id
+
+        heading_msg = "Your Reading is " + scan_serializer.data['scan_id']
         content_msg = "Your Reading has been successfully computed."
         data = {    "app_id": "fad6e42a-0b02-45d6-9ab0-a654b204aca9", "contents": {"en": content_msg}, "headings": {"en": heading_msg}, "include_external_user_ids": [phone_number] , "chrome_web_image": "https://images.ctfassets.net/hrltx12pl8hq/7yQR5uJhwEkRfjwMFJ7bUK/dc52a0913e8ff8b5c276177890eb0129/offset_comp_772626-opt.jpg?fit=fill&w=800&h=300"}
 

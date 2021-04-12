@@ -1,4 +1,7 @@
 from django.db import models
+from django.db.models.signals import post_save, pre_save
+from users.utils import unique_id_generator
+
 
 from users.models import Profile 
 
@@ -25,5 +28,13 @@ class Scan(models.Model):
     def getPhoneNumberByUser(cls, user):
         phone_number = cls.objects.filter(user = user)[0].user.phone_number
         return phone_number
+
+
+def r_pre_save_receiever(sender,instance,*args,**kwargs):
+    if not instance.scan_id:
+        instance.scan_id = unique_id_generator(instance)
+        print(instance.scan_id)
+
+pre_save.connect(r_pre_save_receiever, sender=Scan)
 
 # Create your models here.

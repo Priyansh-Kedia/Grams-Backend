@@ -1,7 +1,6 @@
 def mock():
-    
+        
     dummy_data = {
-        'scan_id': "hello",
         'item_type' : "hello",
         'sub_type' : "hello",
         'created_on' : "2021-01-01",
