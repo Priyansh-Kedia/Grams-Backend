@@ -11,7 +11,7 @@ def unique_id_generator(instance,new_slug=None):
     if new_slug is not None:
         slug = new_slug
     else:
-        slug = uuid.uuid1().hex
+        slug = uuid.uuid4().hex[:16]
         # if instance.__class__ == models.Blog:
         #     slug = slugify(instance.title)
         # elif instance.__class__ == models.Topic:
