@@ -20,4 +20,14 @@ def retreive_scan(request):
         scan_serializer = ScanSerializer(scan_set, many = True)
         return Response(scan_serializer.data, status = status.HTTP_200_OK)
 
+@api_view(['DELETE',])
+def delete_readings(request):
+    scan_id = request.POST.get('scan_id')
+    try:
+        Scan.objects.get(scan_id=scan_id).delete()
+        return Response(status = status.HTTP_200_OK)
+    except:
+        return Response(status = status.HTTP_400_BAD_REQUEST)
+
+
 # Create your views here.

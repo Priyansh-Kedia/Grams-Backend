@@ -1,6 +1,6 @@
 from . import models
 # from process_grains.models import Scan
-
+import secrets
 import uuid
 # DONT_USE = ['remove','approve','admin','teach',]
 
@@ -11,7 +11,8 @@ def unique_id_generator(instance,new_slug=None):
     if new_slug is not None:
         slug = new_slug
     else:
-        slug = uuid.uuid4().hex[:16]
+        # slug = uuid.uuid4().hex[:16]
+        slug = secrets.token_hex(8)
         # if instance.__class__ == models.Blog:
         #     slug = slugify(instance.title)
         # elif instance.__class__ == models.Topic:
@@ -27,7 +28,7 @@ def unique_id_generator(instance,new_slug=None):
     Klass = instance.__class__
     qs_exists = Klass.objects.filter(scan_id=slug).exists()
     if qs_exists:
-        new_slug = uuid.uuid1().hex
+        new_slug = secrets.token_hex(8)
         return unique_id_generator(instance, new_slug=new_slug)
         # new_slug = "{slug}-{randstr}".format(slug=slug,randstr=random_string_generator(size=4))
         # return unique_slug_generator(instance, new_slug=new_slug)
