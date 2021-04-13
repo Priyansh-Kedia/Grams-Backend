@@ -20,7 +20,7 @@ def retreive_scan(request):
         scan_serializer = ScanSerializer(scan_set, many = True)
         return Response(scan_serializer.data, status = status.HTTP_200_OK)
 
-@api_view(['DELETE',])
+@api_view(['POST',])
 def delete_readings(request):
     scan_id = request.POST.get('scan_id')
     try:
