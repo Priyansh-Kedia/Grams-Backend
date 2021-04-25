@@ -57,10 +57,10 @@ def getData(Contours, Mapping):
     for i in range(len(Contours)):
         Contour_Dict[str(i)] = FindParams(Contours[i], Mapping)
     
-    # from pandas import DataFrame, Series
-    # df = DataFrame(dict([ (k,Series(v)) for k,v in Contour_Dict.items() ]))
-    # df = df.T
-    # df.to_csv(CSV_name, header=False, index=False) 
+    from pandas import DataFrame, Series
+    df = DataFrame(dict([ (k,Series(v)) for k,v in Contour_Dict.items() ]))
+    df = df.T
+    df.to_csv("Output.csv", header=False, index=False) 
     
     Mean = GetAvg(Contour_Dict)
     
