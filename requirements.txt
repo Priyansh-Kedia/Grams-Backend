@@ -1,3 +1,5 @@
+typing_extensions==3.7.4.3
+llvmlite==0.36.0
 numpy==1.16.6
 numba==0.53.1
 scipy==1.6.2
@@ -6,6 +8,10 @@ opencv-contrib-python==4.5.1.48
 tqdm==4.60.0
 tifffile==2021.4.8
 natsort==7.1.1
+six==1.15.0
+pytz==2021.1
+python-dateutil==2.8.1
+pandas==1.2.4
 # 
 amqp==5.0.5
 asgiref==3.3.0
