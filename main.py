@@ -144,7 +144,8 @@ def main(imgPath, Diameter, Rescale_Factor):
         print("\nAruco markers not found properly.")
         print("Retake the image.\n")
 
-    Contours = DeleteMarkerContour(Contours, Corners)
+    else:
+        Contours = DeleteMarkerContour(Contours, Corners)
     
     finalData = getData(Contours, Mapping)
 

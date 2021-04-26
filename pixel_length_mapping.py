@@ -23,6 +23,8 @@ def DetectAruco(Image, NumOfAruco, DictionaryType = cv2.aruco.DICT_6X6_50):
     
     Corners, IDs, RejectedImgPoints = cv2.aruco.detectMarkers(Image, ArucoDict, parameters=Parameters)
 
+    if IDs is None:
+        return False, Corners, IDs    
     if len(IDs) == NumOfAruco:
         return True, Corners, IDs
     return False, Corners, IDs
@@ -77,7 +79,7 @@ def MapPixels(Image, ActualSize, NumOfAruco, DictionaryType = cv2.aruco.DICT_6X6
 def MapPixels_Avg(Image, ActualSize, NumOfAruco, DictionaryType = cv2.aruco.DICT_6X6_50):
     Flag, Mapping, Corners, IDs = MapPixels(Image, ActualSize, NumOfAruco, DictionaryType=DictionaryType)
     if not Flag:
-        return Flag, Mapping, Corners, IDs
+        return Flag, [1, 1], Corners, IDs
     
     Mapping = np.mean(np.asarray(Mapping), axis=0)
 
