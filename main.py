@@ -85,6 +85,23 @@ def DeleteMarkerContour(Contours, Corners):
     return np.asarray(NewContours, dtype=type(Contours))
 
 
+def NumberGrain(BlueSheet, Contours, StartingIndex=0):
+    Font = cv2.FONT_HERSHEY_SIMPLEX
+    FontScale = 0.4
+    Thickness = 1
+    Colour = (0, 0, 255)
+
+    BlueSheetCopy1 = BlueSheet.copy()
+    cv2.drawContours(BlueSheetCopy1, Contours, -1, (0, 255, 0), 1)
+
+    for i in range(len(Contours)):
+        Contour = Contours[i]
+        x, y, w, h = cv2.boundingRect(Contour)
+        BottomLeftPoint = ( x, y )
+        BlueSheetCopy1 = cv2.putText(BlueSheetCopy1, str(cv2.contourArea(Contour)), BottomLeftPoint, Font, FontScale, Colour, Thickness, cv2.LINE_AA)
+
+
+    return BlueSheetCopy1
 
 def SegmentCellpose(img, Diameter):
     import cellpose
@@ -101,6 +118,10 @@ def SegmentCellpose(img, Diameter):
     masks, flows, styles, diams = Model.eval(img, diameter=Diameter, channels=[0, 0], do_3D=False)
     outlines = cellpose.utils.outlines_list(masks)
     
+    # Numbering grains
+    NumberedImg = NumberGrain(img.copy(), outlines, StartingIndex=1)
+    # cv2.imwrite("NumberedImg.jpg", NumberedImg)
+
     Contours = []
     for outline in outlines:
         contour = []
@@ -108,14 +129,14 @@ def SegmentCellpose(img, Diameter):
             contour.append(np.array([np.asarray([outline[i][0], outline[i][1]], dtype=np.int32)], dtype=np.int32))
         Contours.append(np.asarray(contour, dtype=np.int32))
 
-    return Contours
+    return Contours, NumberedImg
 
 
 def main(imgPath, Diameter, Rescale_Factor):
     img = cv2.imread(imgPath)
     img = cv2.resize(img, (0, 0), fx=Rescale_Factor, fy=Rescale_Factor)
 
-    Contours = SegmentCellpose(img, Diameter)
+    Contours, NumberedImg = SegmentCellpose(img, Diameter)
 
     # Map pixel length
     Flag, Mapping, Corners, _ = plm.MapPixels_Avg(img, (5, 5), 1)
@@ -127,12 +148,12 @@ def main(imgPath, Diameter, Rescale_Factor):
     
     finalData = getData(Contours, Mapping)
 
-    return finalData
+    return finalData, NumberedImg
 
 
 #print(main("GramsAppImages/mung_good_final_wia.jpg", 20, 0.25))
 if __name__ == "__main__":
         ArgParse()
 
-        results = main(args["imgPath"], args["Diameter"], args["RescaleFactor"])
+        results, _ = main(args["imgPath"], args["Diameter"], args["RescaleFactor"])
         print(results)
