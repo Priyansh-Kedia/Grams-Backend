@@ -10,6 +10,7 @@ from django.forms.models import model_to_dict
 
 from .serializers import OTPSerializer,AddressSerializer,ProfileSerializer, ImageSerializer
 from process_grains.serializers import ScanSerializer
+from main import main
 
 from .models import Profile, Address, Image
 from process_grains.models import Scan
@@ -151,6 +152,7 @@ from rest_framework.views import APIView
 from rest_framework.parsers import MultiPartParser, FormParser
 # from py_source import py_main
 from mock import mock
+from datetime import datetime 
 
 import requests
 from urllib.parse import unquote
@@ -192,14 +194,29 @@ def upload_image(request, phone_number):
         #print(image_obj.image)
         image_obj = Image.objects.create(image = request.data['image'])
         # print(image_obj.image)
-        # print(request.data)
-        ml_data = mock()
+        print(image_obj.image.url)
+        ml_list, _ = main(image_obj.image.url,20,0.25)
+        # ml_data = mock()
         
-        ml_data['user'] = profile.pk
-        print(profile.pk)
-        ml_data['image'] = image_obj.image
+        # ml_data['user'] = profile.pk
+        # print(profile.pk)
+        # ml_data['image'] = image_obj.image
         # print(ml_data)
+        ml_data =  {
+        'item_type' : "hello",
+        'sub_type' : "hello",
+        'created_on' : datetime.now(),
+        'no_of_particles' : ml_list[0],
+        'avg_area' : ml_list[1],
+        'avg_length' : ml_list[2],
+        'avg_width' : ml_list[3],
+        'avg_l_by_w' : ml_list[4],
+        'avg_circularity' : ml_list[5],
+        'lot_no' : "hello",
+        'no_of_kernels' : ml_list[0],
+    }
 
+        print(ml_data)
         scan_serializer = ScanSerializer(data = ml_data)
 
         

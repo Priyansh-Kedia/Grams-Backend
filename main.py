@@ -152,9 +152,5 @@ def main(imgPath, Diameter, Rescale_Factor):
     return finalData, NumberedImg
 
 
-#print(main("GramsAppImages/mung_good_final_wia.jpg", 20, 0.25))
 if __name__ == "__main__":
-        ArgParse()
-
-        results, _ = main(args["imgPath"], args["Diameter"], args["RescaleFactor"])
-        print(results)
+       print(main("Wheat.jpg", 20, 0.25))
