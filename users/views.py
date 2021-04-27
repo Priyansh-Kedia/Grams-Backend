@@ -195,7 +195,7 @@ def upload_image(request, phone_number):
         image_obj = Image.objects.create(image = request.data['image'])
         # print(image_obj.image)
         print(image_obj.image.url)
-        ml_list, _ = main(image_obj.image.url,20,0.25)
+        ml_list, _ = main('Wheeat.jpg',20,0.25)
         # ml_data = mock()
         
         # ml_data['user'] = profile.pk
