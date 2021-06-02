@@ -1,4 +1,5 @@
 import cv2
+import time as t
 import numpy as np
 import argparse
 
@@ -7,17 +8,17 @@ import pixel_length_mapping as plm
 
 
 def ArgParse():
-        global args
-
         # Construct the argument parser and parse the arguments
         ap = argparse.ArgumentParser()
 
         ap.add_argument("imgPath", help="Path of the input image")
-        ap.add_argument("-d", "--Diameter", type=int, help="Diameter used in cellpose")
-        ap.add_argument("-rf", "--RescaleFactor", type=float, default=1, help="Rescale factor of the image")
+        ap.add_argument("-d", "--Diameter", type=int, default=20, help="Diameter used in cellpose")
+        ap.add_argument("-df", "--Downscale_Factor", type=float, default=0.25, help="Downscale factor of the image")
+        ap.add_argument("-uf", "--Upscale_Factor", type=float, default=4, help="Upscale factor of the image")
 
         args = vars(ap.parse_args())
 
+        return args
 
 
 def GetAvg(Contour_Dict):
@@ -85,42 +86,80 @@ def DeleteMarkerContour(Contours, Corners):
     return np.asarray(NewContours, dtype=type(Contours))
 
 
-def NumberGrain(BlueSheet, Contours, StartingIndex=0):
+def NumberGrain(Image, Upscale_Factor, Contours, StartingIndex=1):
+    # Upscaling it again
+    Image = cv2.resize(Image, (0, 0), fx=Upscale_Factor, fy=Upscale_Factor)
+
     Font = cv2.FONT_HERSHEY_SIMPLEX
-    FontScale = 0.4
+    FontScale = 0.6
     Thickness = 1
     Colour = (0, 0, 255)
 
-    BlueSheetCopy1 = BlueSheet.copy()
-    cv2.drawContours(BlueSheetCopy1, Contours, -1, (0, 255, 0), 1)
+    ImageCopy1 = Image.copy()
+    cv2.drawContours(ImageCopy1, Contours, -1, (0, 255, 0), 1)
 
     for i in range(len(Contours)):
         Contour = Contours[i]
         x, y, w, h = cv2.boundingRect(Contour)
-        BottomLeftPoint = ( x, y )
-        BlueSheetCopy1 = cv2.putText(BlueSheetCopy1, str(cv2.contourArea(Contour)), BottomLeftPoint, Font, FontScale, Colour, Thickness, cv2.LINE_AA)
+        BottomLeftPoint = ( x + w//3, y + (2*h)//3)
+        ImageCopy1 = cv2.putText(ImageCopy1, str(i+StartingIndex), BottomLeftPoint, Font, FontScale, Colour, Thickness, cv2.LINE_AA)
+
+    cv2.imwrite("NumberedImg.jpg", ImageCopy1)
+
+    return ImageCopy1
 
 
-    return BlueSheetCopy1
 
-def SegmentCellpose(img, Diameter):
-    import cellpose
-    from cellpose import utils, core, models
+def outlines_list_Fast(masks, DF, UF):
+    GrainDim = int(200 * DF * UF)
 
+    uni = np.unique(masks, return_index=True)
+
+    toXY = []
+    for i in range(len(uni[1])):
+        toXY.append([uni[1][i] % masks.shape[1], uni[1][i] // masks.shape[1]])
+
+    outlines = []
+    for i in range(1, len(uni[0])):
+        startPt = toXY[i]
+        y1 = max(startPt[1] - 5, 0)
+        x1 = max(startPt[0] - (GrainDim * 2), 0)
+        y2 = min(masks.shape[0]-1, startPt[1] + GrainDim*3)
+        x2 = min(masks.shape[1]-1, startPt[0] + (GrainDim * 2))
+
+        GrainROI = masks[y1:y2+1, x1:x2+1]
+
+        GrainROI_n = GrainROI == uni[0][i]
+
+        Contour = cv2.findContours(GrainROI_n.astype(np.uint8), cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_NONE)[-2][0]
+
+        outline = []
+        for j in range(len(Contour)):
+            outline.append(np.array([Contour[j][0][0] + x1, Contour[j][0][1] + y1], dtype=int))
+        outlines.append(np.asarray(outline, dtype=int))
+
+    return outlines
+
+
+
+def SegmentCellpose(img, Diameter, Downscale_Factor, Upscale_Factor):
+    import Compiled as cc
 
     # Global variables shifted here
-    use_GPU = core.use_gpu()
+    use_GPU = cc.use_gpu()
     print('GPU activated? %d'%use_GPU)
 
     # model_type='cyto' or model_type='nuclei'
-    Model = models.Cellpose(gpu=use_GPU, model_type='cyto', net_avg=False)
-    
+    Model = cc.Pose(gpu=use_GPU, model_type='cyto', net_avg=False, Upscale_Factor=Upscale_Factor)
+
     masks, flows, styles, diams = Model.eval(img, diameter=Diameter, channels=[0, 0], do_3D=False)
-    outlines = cellpose.utils.outlines_list(masks)
-    
+
+    outlinesStart = t.time()
+    outlines = outlines_list_Fast(masks, Downscale_Factor, Upscale_Factor)
+    print("Time Taken for calculating outlines: {}".format(t.time() - outlinesStart))
+
     # Numbering grains
-    NumberedImg = NumberGrain(img.copy(), outlines, StartingIndex=1)
-    # cv2.imwrite("NumberedImg.jpg", NumberedImg)
+    NumberedImg = NumberGrain(img.copy(), Upscale_Factor, outlines, StartingIndex=1)
 
     Contours = []
     for outline in outlines:
@@ -132,14 +171,18 @@ def SegmentCellpose(img, Diameter):
     return Contours, NumberedImg
 
 
-def main(imgPath, Diameter, Rescale_Factor):
-    img = cv2.imread(imgPath)
-    img = cv2.resize(img, (0, 0), fx=Rescale_Factor, fy=Rescale_Factor)
+def main(ImagePath, Diameter, Downscale_Factor, Upscale_Factor=4):
+    Image = cv2.imread(ImagePath)
+    DownsizedImage = cv2.resize(Image, (0, 0), fx=Downscale_Factor, fy=Downscale_Factor)
+    if (Downscale_Factor*Upscale_Factor) != 1.0:
+        FinalImage = cv2.resize(Image, (0, 0), fx=(Downscale_Factor*Upscale_Factor), fy=(Downscale_Factor*Upscale_Factor))
+    else:
+        FinalImage = Image.copy()
 
-    Contours, NumberedImg = SegmentCellpose(img, Diameter)
+    Contours, NumberedImage = SegmentCellpose(DownsizedImage, Diameter, Downscale_Factor, Upscale_Factor)
 
     # Map pixel length
-    Flag, Mapping, Corners, _ = plm.MapPixels_Avg(img, (5, 5), 1)
+    Flag, Mapping, Corners, _ = plm.MapPixels_Avg(FinalImage, (5, 5), 1)
     if not Flag:
         print("\nAruco markers not found properly.")
         print("Retake the image.\n")
@@ -149,8 +192,11 @@ def main(imgPath, Diameter, Rescale_Factor):
     
     finalData = getData(Contours, Mapping)
 
-    return finalData, NumberedImg
+    return finalData, NumberedImage
 
 
 if __name__ == "__main__":
-       print(main("Wheat.jpg", 20, 0.25))
+        args = ArgParse()
+
+        results, _ = main(args["imgPath"], args["Diameter"], args["Downscale_Factor"], Upscale_Factor=args["Upscale_Factor"])
+        print(results)
