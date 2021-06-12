@@ -171,7 +171,7 @@ def upload_image(request, phone_number):
         # phone_number = request.POST.get(Constants.PHONE_NUMBER)
         # phone_number = Scan.getPhoneNumberByUser(user = request.user.pk) #Profile.objects.get(user = request.user).phone_number
         # print(phone_number)
-        # phone_number  = '+919521152961'
+        phone_number  = '+919521152961'
         profile = Profile.objects.get(phone_number = phone_number)
         
         
@@ -195,11 +195,10 @@ def upload_image(request, phone_number):
         image_obj = Image.objects.create(image = request.data['image'])
         # print(image_obj.image)
         print(image_obj.image.url)
-        ml_list, _ = main('Wheeat.jpg',20,0.25)
+        ml_list, _ = main('onion1.jpg',20,0.25)
         # ml_data = mock()
         ##
         
-        # ml_data['user'] = profile.pk
         # print(profile.pk)
         # ml_data['image'] = image_obj.image
         # print(ml_data)
@@ -208,14 +207,15 @@ def upload_image(request, phone_number):
         'sub_type' : "hello",
         'created_on' : datetime.now(),
         'no_of_particles' : ml_list[0],
-        'avg_area' : ml_list[1],
-        'avg_length' : ml_list[2],
-        'avg_width' : ml_list[3],
-        'avg_l_by_w' : ml_list[4],
-        'avg_circularity' : ml_list[5],
+        'avg_area' : round(ml_list[1], 2),
+        'avg_length' : round(ml_list[2], 2),
+        'avg_width' : round(ml_list[3], 2),
+        'avg_l_by_w' : round(ml_list[4], 2),
+        'avg_circularity' : round(ml_list[5], 2),
         'lot_no' : "hello",
         'no_of_kernels' : ml_list[0],
-    }
+        }
+        ml_data['user'] = profile.pk
 
         print(ml_data)
         scan_serializer = ScanSerializer(data = ml_data)
