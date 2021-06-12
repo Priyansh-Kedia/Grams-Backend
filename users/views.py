@@ -157,6 +157,11 @@ from datetime import datetime
 import requests
 from urllib.parse import unquote
 
+@api_view(['GET',])
+def health(request):
+    return Response("OK", status = status.HTTP_200_OK)
+
+
 @api_view(['POST',])
 @parser_classes([MultiPartParser, FormParser])
 def upload_image(request, phone_number):
