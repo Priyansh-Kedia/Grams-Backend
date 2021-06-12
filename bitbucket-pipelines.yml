@@ -6,6 +6,10 @@
 
 # Prerequisites: $DOCKERHUB_USERNAME, $DOCKERHUB_PASSWORD setup as deployment variables
 
+options:
+  docker: true
+  size: 2x
+
 image: atlassian/default-image:2
 
 pipelines:
@@ -52,3 +56,10 @@ pipelines:
             - docker push "${IMAGE}:${VERSION}"
           services:
             - docker
+
+
+definitions:
+  services:
+    docker:
+      memory: 4096
+
