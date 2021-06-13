@@ -14,7 +14,7 @@ image: atlassian/default-image:2
 
 pipelines:
   branches:
-    master:
+    develop:
       - step:
           name: Build and Deploy
           script:
