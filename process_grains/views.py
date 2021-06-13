@@ -12,11 +12,7 @@ from .serializers import ScanSerializer
 def retreive_scan(request):
     if request.method == "GET":
         user_id = request.GET['profile_id']
-        # print(request.GET['phone_number'])
-        # phone_number = '+' + request.GET['phone_number']
-        # print(phone_number)
         scan_set = Profile.getAllScans(user_id)
-        # print(scan_set)
         scan_serializer = ScanSerializer(scan_set, many = True)
         return Response(scan_serializer.data, status = status.HTTP_200_OK)
 
@@ -30,4 +26,3 @@ def delete_readings(request):
         return Response(status = status.HTTP_400_BAD_REQUEST)
 
 
-# Create your views here.

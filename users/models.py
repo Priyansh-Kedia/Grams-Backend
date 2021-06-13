@@ -27,8 +27,6 @@ class Profile(models.Model):
     @classmethod
     def getAllScans(cls, user_id):
         profile = cls.objects.get(pk = user_id)
-        # print(profile)
-        # print(profile.scan_set.all())
         return profile.scan_set.all() 
 
 
