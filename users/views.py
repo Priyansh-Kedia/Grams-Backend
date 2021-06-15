@@ -10,10 +10,11 @@ from . import utils
 from .serializers import OTPSerializer,AddressSerializer,ProfileSerializer, ImageSerializer
 from process_grains.serializers import ScanSerializer
 from main import main
-
+from django_q.tasks import async_task
 from .models import Profile, Address, Image
 from process_grains.models import Scan
 from grams_backend import Constants
+from .utils import run_ml_code
 
 
 # OTP #
@@ -154,51 +155,51 @@ def health(request):
 def upload_image(request, phone_number):
     if request.method == 'POST':
 
-        phone_number  = '+919521152961'
+        phone_number  = '+919760493483'
         profile = Profile.objects.get(phone_number = phone_number)
         
         
  
-        image_obj = Image.objects.create(image = request.data['image'])
+        image_obj = Image.objects.create(image = 'onions1.jpg')
         print(image_obj.image.url)
-        ml_list, _ = main('onion1.jpg',20,0.25)
-        ml_data =  {
-        'item_type' : "hello",
-        'sub_type' : "hello",
-        'created_on' : datetime.now(),
-        'no_of_particles' : ml_list[0],
-        'avg_area' : round(ml_list[1], 2),
-        'avg_length' : round(ml_list[2], 2),
-        'avg_width' : round(ml_list[3], 2),
-        'avg_l_by_w' : round(ml_list[4], 2),
-        'avg_circularity' : round(ml_list[5], 2),
-        'lot_no' : "hello",
-        'no_of_kernels' : ml_list[0],
-        }
-        ml_data['user'] = profile.pk
+        async_task(run_ml_code)
+        # ml_data =  {
+        # 'item_type' : "hello",
+        # 'sub_type' : "hello",
+        # 'created_on' : datetime.now(),
+        # 'no_of_particles' : ml_list[0],
+        # 'avg_area' : round(ml_list[1], 2),
+        # 'avg_length' : round(ml_list[2], 2),
+        # 'avg_width' : round(ml_list[3], 2),
+        # 'avg_l_by_w' : round(ml_list[4], 2),
+        # 'avg_circularity' : round(ml_list[5], 2),
+        # 'lot_no' : "hello",
+        # 'no_of_kernels' : ml_list[0],
+        # }
+        # ml_data['user'] = profile.pk
 
-        print(ml_data)
-        scan_serializer = ScanSerializer(data = ml_data)
-
-        
-
-        if not scan_serializer.is_valid():
-            return Response(scan_serializer.errors)
+        # print(ml_data)
+        # scan_serializer = ScanSerializer(data = ml_data)
 
         
+
+        # if not scan_serializer.is_valid():
+        #     return Response(scan_serializer.errors)
+
         
-        scan_serializer.save()
+        
+        # scan_serializer.save()
 
 
 
-        heading_msg = "Your results of reading ID - " +  scan_serializer.data['scan_id'] + " is available, View your result in the app"
-        content_msg = "Your Reading has been successfully computed."
+        heading_msg = "Your results will be available soon"
+        content_msg = "Your results will come soon"
         data = {    "app_id": "fad6e42a-0b02-45d6-9ab0-a654b204aca9", "contents": {"en": content_msg}, "headings": {"en": heading_msg}, "include_external_user_ids": [phone_number] , "chrome_web_image": "https://images.ctfassets.net/hrltx12pl8hq/7yQR5uJhwEkRfjwMFJ7bUK/dc52a0913e8ff8b5c276177890eb0129/offset_comp_772626-opt.jpg?fit=fill&w=800&h=300"}
 
         requests.post(    "https://onesignal.com/api/v1/notifications",    headers={"Authorization": "Basic NDJkOGMyZDQtMjgyYi00Y2JkLWFjZTgtZGQ2NjQ1NDUwNzg3"}, json=data)
 
         data = {
-            'data': scan_serializer.data,
+            'data': 'hello',
         }
         return Response(data, status = status.HTTP_200_OK)
 

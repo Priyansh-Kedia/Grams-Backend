@@ -47,6 +47,7 @@ INSTALLED_APPS = [
 
     # api
     'rest_framework',
+    'django_q',
 
     # celery
     'django_celery_beat',
@@ -160,5 +161,9 @@ CELERY_BEAT_SCHEDULE = {
 # Specifies to use same database as django
 CELERY_RESULT_BACKEND = 'django-db'
 CELERY_CACHE_BACKEND = 'django-cache'
+Q_CLUSTER = {
+    "name": "main",
+    "orm": "default",  
+}
 
 django_heroku.settings(locals())

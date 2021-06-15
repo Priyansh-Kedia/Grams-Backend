@@ -1,6 +1,6 @@
 typing_extensions==3.7.4.3
 llvmlite==0.36.0
-numpy==1.16.6
+numpy
 numba==0.53.1
 scipy==1.6.2
 torch==1.8.1
