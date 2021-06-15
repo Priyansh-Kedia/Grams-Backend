@@ -163,7 +163,11 @@ CELERY_RESULT_BACKEND = 'django-db'
 CELERY_CACHE_BACKEND = 'django-cache'
 Q_CLUSTER = {
     "name": "main",
-    "orm": "default",  
+    "orm": "default", 
+    'redis': {
+        'host': '127.0.0.1',
+        'port': 6379,
+        'db': 0, } 
 }
 
 django_heroku.settings(locals())
