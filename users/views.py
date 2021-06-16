@@ -15,6 +15,14 @@ from .models import Profile, Address, Image
 from process_grains.models import Scan
 from grams_backend import Constants
 from .utils import run_ml_code
+from rest_framework.decorators import parser_classes
+from rest_framework.views import APIView
+from rest_framework.parsers import MultiPartParser, FormParser
+from mock import mock
+from datetime import datetime 
+
+import requests
+from urllib.parse import unquote
 
 
 # OTP #
@@ -37,10 +45,10 @@ def generate_otp(request):
         if phone_number == '+911234567890':
             user_profile.otp = '1234'
             user_profile.save()
-            message = "<#> Your GramsApp code is: {otp} \n {hash}".format(otp = otp, hash = hashValue)
+            message = Constants.GRAMS_MESSAGE+" {otp} \n {hash}".format(otp = otp, hash = hashValue)
             data = {Constants.MESSAGE:message, Constants.PROFILE:model_to_dict(user_profile), Constants.IS_VERIFIED:False}
             return Response(data, status = status.HTTP_200_OK) 
-        url = "https://2factor.in/API/V1/7125245b-99cb-11eb-80ea-0200cd936042/SMS/" + phone_number + "/" + str(otp)
+        url = Constants.OTP_URL+ Constants.OTP_KEY+ "SMS/" + phone_number + "/" + str(otp)
         requests.post( url )
 
         if user_profile:
@@ -141,14 +149,7 @@ def retrieve_address(request):
         return Response(retrieved_address_serializer.data, status = status.HTTP_200_OK)
 
 
-from rest_framework.decorators import parser_classes
-from rest_framework.views import APIView
-from rest_framework.parsers import MultiPartParser, FormParser
-from mock import mock
-from datetime import datetime 
 
-import requests
-from urllib.parse import unquote
 
 @api_view(['GET',])
 def health(request):
@@ -160,40 +161,15 @@ def health(request):
 def upload_image(request, phone_number):
     if request.method == 'POST':
 
-        phone_number  = '+919760493483'
+        
         profile = Profile.objects.get(phone_number = phone_number)
         
         
  
-        image_obj = Image.objects.create(image = 'onions1.jpg')
+        image_obj = Image.objects.create(image = request.POST['image'])
         print(image_obj.image.url)
         async_task(run_ml_code)
-        # ml_data =  {
-        # 'item_type' : "hello",
-        # 'sub_type' : "hello",
-        # 'created_on' : datetime.now(),
-        # 'no_of_particles' : ml_list[0],
-        # 'avg_area' : round(ml_list[1], 2),
-        # 'avg_length' : round(ml_list[2], 2),
-        # 'avg_width' : round(ml_list[3], 2),
-        # 'avg_l_by_w' : round(ml_list[4], 2),
-        # 'avg_circularity' : round(ml_list[5], 2),
-        # 'lot_no' : "hello",
-        # 'no_of_kernels' : ml_list[0],
-        # }
-        # ml_data['user'] = profile.pk
-
-        # print(ml_data)
-        # scan_serializer = ScanSerializer(data = ml_data)
-
-        
-
-        # if not scan_serializer.is_valid():
-        #     return Response(scan_serializer.errors)
-
-        
-        
-        # scan_serializer.save()
+    
 
 
 
@@ -201,7 +177,7 @@ def upload_image(request, phone_number):
         content_msg = "Your results will come soon"
         data = {    "app_id": "fad6e42a-0b02-45d6-9ab0-a654b204aca9", "contents": {"en": content_msg}, "headings": {"en": heading_msg}, "include_external_user_ids": [phone_number] , "chrome_web_image": "https://images.ctfassets.net/hrltx12pl8hq/7yQR5uJhwEkRfjwMFJ7bUK/dc52a0913e8ff8b5c276177890eb0129/offset_comp_772626-opt.jpg?fit=fill&w=800&h=300"}
 
-        requests.post(    "https://onesignal.com/api/v1/notifications",    headers={"Authorization": "Basic NDJkOGMyZDQtMjgyYi00Y2JkLWFjZTgtZGQ2NjQ1NDUwNzg3"}, json=data)
+        requests.post(Constants.API_URL,headers={"Authorization": "Basic "+Constants.API_KEY}, json=data)
 
         data = {
             'data': 'hello',
