@@ -42,7 +42,7 @@ def generate_otp(request):
         except Profile.DoesNotExist:
             user_profile = Profile.objects.create(phone_number = phone_number)
 
-        if phone_number == '+911234567890':
+        if phone_number == '+911111111111':
             user_profile.otp = '1234'
             user_profile.save()
             message = Constants.GRAMS_MESSAGE+" {otp} \n {hash}".format(otp = otp, hash = hashValue)
@@ -54,7 +54,7 @@ def generate_otp(request):
         if user_profile:
             user_profile.otp = otp
             user_profile.save()          
-            message = "<#> Your GramsApp code is: {otp} \n {hash}".format(otp = otp, hash = hashValue)
+            message = Constants.GRAMS_MESSAGE+" {otp} \n {hash}".format(otp = otp, hash = hashValue)
             data = {Constants.MESSAGE:message, Constants.PROFILE:model_to_dict(user_profile), Constants.IS_VERIFIED:False}
             return Response(data, status = status.HTTP_200_OK)
         else:
@@ -175,7 +175,7 @@ def upload_image(request, phone_number):
 
         heading_msg = "Your results will be available soon"
         content_msg = "Your results will come soon"
-        data = {    "app_id": "fad6e42a-0b02-45d6-9ab0-a654b204aca9", "contents": {"en": content_msg}, "headings": {"en": heading_msg}, "include_external_user_ids": [phone_number] , "chrome_web_image": "https://images.ctfassets.net/hrltx12pl8hq/7yQR5uJhwEkRfjwMFJ7bUK/dc52a0913e8ff8b5c276177890eb0129/offset_comp_772626-opt.jpg?fit=fill&w=800&h=300"}
+        data = {    "app_id": Constants.APP_ID, "contents": {"en": content_msg}, "headings": {"en": heading_msg}, "include_external_user_ids": [phone_number] , "chrome_web_image": "https://images.ctfassets.net/hrltx12pl8hq/7yQR5uJhwEkRfjwMFJ7bUK/dc52a0913e8ff8b5c276177890eb0129/offset_comp_772626-opt.jpg?fit=fill&w=800&h=300"}
 
         requests.post(Constants.API_URL,headers={"Authorization": "Basic "+Constants.API_KEY}, json=data)
 
