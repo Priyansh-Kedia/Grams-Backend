@@ -33,15 +33,12 @@ def generate_otp(request):
         phone_number = request.POST.get(Constants.PHONE_NUMBER)         
         otp = utils.otp_generator()
         serializer = OTPSerializer(data = request.data)
-
         if not serializer.is_valid():
             return Response({Constants.MESSAGE:"Invalid phone number", Constants.PROFILE:None, Constants.IS_VERIFIED:False}, status = status.HTTP_200_OK)
-
         try:
             user_profile = Profile.objects.get(phone_number = phone_number)
         except Profile.DoesNotExist:
             user_profile = Profile.objects.create(phone_number = phone_number)
-
         if phone_number == '+911111111111':
             user_profile.otp = '1234'
             user_profile.save()
@@ -50,7 +47,6 @@ def generate_otp(request):
             return Response(data, status = status.HTTP_200_OK) 
         url = Constants.OTP_URL+ Constants.OTP_KEY+ "SMS/" + phone_number + "/" + str(otp)
         requests.post( url )
-
         if user_profile:
             user_profile.otp = otp
             user_profile.save()          
@@ -92,10 +88,8 @@ def update_profile(request):
     if request.method == "PUT":
         profile_id = request.data.get('profile_id')
         profile_serializer = ProfileSerializer(data =request.data)
-
         if not profile_serializer.is_valid():
             return Response({Constants.MESSAGE:profile_serializer.errors}, status = status.HTTP_422_UNPROCESSABLE_ENTITY)
-
         updated_profile = profile_serializer.update(instance = Profile.objects.get(profile_id = profile_id))
         return Response(model_to_dict(updated_profile), status = status.HTTP_200_OK)
 
@@ -103,12 +97,10 @@ def update_profile(request):
 def retrieve_profile(request):
     if request.method == "GET":
         phone_number = request.GET.get(Constants.PHONE_NUMBER, None)
-
         try:
             profile_obj = Profile.objects.get(phone_number = phone_number)
         except Profile.DoesNotExist:
             return Response({Constants.MESSAGE:'Profile does not exist!'}, status = status.HTTP_404_NOT_FOUND)
-
         return Response(model_to_dict(profile_obj), status = status.HTTP_200_OK)
 
 
@@ -121,10 +113,8 @@ def add_address(request):
         print(add_obj.address)
         add_obj.save()
         address_serializer = AddressSerializer(data = request.data)
-        
         if not address_serializer.is_valid():
             return Response(address_serializer.errors, status = status.HTTP_422_UNPROCESSABLE_ENTITY)
-
         updated_address_obj = address_serializer.create()
         return Response(model_to_dict(updated_address_obj), status = status.HTTP_200_OK)
 
@@ -132,10 +122,8 @@ def add_address(request):
 def update_address(request):
     if request.method == "PUT":
         address_serializer = AddressSerializer(data = request.data)
-
         if not address_serializer.is_valid():
             return Response({Constants.MESSAGE:address_serializer.errors}, status = status.HTTP_422_UNPROCESSABLE_ENTITY)
-
         updated_address = address_serializer.update(instance = Address.objects.get(pk = request.data['address_id']))
         return Response(model_to_dict(updated_address), status = status.HTTP_200_OK)
 
@@ -144,7 +132,6 @@ def retrieve_address(request):
     if request.method == "GET":
         profile_id = request.GET.get(Constants.PROFILE_ID, None)
         retrieved_addresses = Profile.getAllAddresses(profile_id)
-
         retrieved_address_serializer = AddressSerializer(retrieved_addresses, many = True)
         return Response(retrieved_address_serializer.data, status = status.HTTP_200_OK)
 
@@ -160,25 +147,14 @@ def health(request):
 @parser_classes([MultiPartParser, FormParser])
 def upload_image(request, phone_number):
     if request.method == 'POST':
-
-        
         profile = Profile.objects.get(phone_number = phone_number)
-        
-        
- 
         image_obj = Image.objects.create(image = request.POST['image'])
         print(image_obj.image.url)
         async_task(run_ml_code)
-    
-
-
-
         heading_msg = "Your results will be available soon"
         content_msg = "Your results will come soon"
-        data = {"app_id": Constants.APP_ID, "contents": {"en": content_msg}, "headings": {"en": heading_msg}, "include_external_user_ids": [phone_number] , "chrome_web_image": "https://images.ctfassets.net/hrltx12pl8hq/7yQR5uJhwEkRfjwMFJ7bUK/dc52a0913e8ff8b5c276177890eb0129/offset_comp_772626-opt.jpg?fit=fill&w=800&h=300"}
-
+        data = {"app_id": Constants.APP_ID, "contents": {"en": content_msg}, "headings": {"en": heading_msg}, "include_external_user_ids": [phone_number] , "chrome_web_image": Constants.CHROME_WEB_IMAGE}
         requests.post(Constants.API_URL,headers={"Authorization": "Basic "+Constants.API_KEY}, json=data)
-
         data = {
             'data': 'hello',
         }
