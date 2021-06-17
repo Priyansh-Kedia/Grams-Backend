@@ -44,6 +44,7 @@ INSTALLED_APPS = [
     # local apps
     'users.apps.UsersConfig',
     'process_grains.apps.ProcessGrainsConfig',
+    'trials.apps.TrialsConfig',
 
     # api
     'rest_framework',
