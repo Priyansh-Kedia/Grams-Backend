@@ -15,6 +15,7 @@ class Profile(models.Model):
     otp = models.IntegerField(validators = [otp_regex], null = True, blank = True)
     otp_timestamp = models.DateTimeField(auto_now = True, verbose_name = "OTP Created On")
     profile_id = models.AutoField(primary_key=True, name='profile_id')
+    gst_no = models.IntegerField(blank=True,null=True)
 
     def __str__(self):
         return self.phone_number

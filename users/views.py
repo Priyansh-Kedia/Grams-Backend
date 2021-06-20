@@ -1,3 +1,4 @@
+from re import T
 from django.shortcuts import render
 from django.http import HttpResponse,JsonResponse
 from django.views.decorators.csrf import csrf_exempt
@@ -10,19 +11,19 @@ from . import utils
 from .serializers import OTPSerializer,AddressSerializer,ProfileSerializer, ImageSerializer
 from process_grains.serializers import ScanSerializer
 from main import main
-from django_q.tasks import async_task
 from .models import Profile, Address, Image
 from process_grains.models import Scan
 from grams_backend import Constants
-from .utils import run_ml_code
 from rest_framework.decorators import parser_classes
 from rest_framework.views import APIView
 from rest_framework.parsers import MultiPartParser, FormParser
 from mock import mock
-from datetime import datetime 
-
+from datetime import datetime, timedelta
+from trials.models import FreeTrial,Paid
 import requests
 from urllib.parse import unquote
+from .tasks import run_ml_code
+from grams_backend.celery import basic
 
 
 # OTP #
@@ -48,6 +49,28 @@ def generate_otp(request):
         url = Constants.OTP_URL+ Constants.OTP_KEY+ "SMS/" + phone_number + "/" + str(otp)
         requests.post( url )
         if user_profile:
+            
+            try:
+                free_trial = FreeTrial.objects.get(user = user_profile)
+                if free_trial.first_trial and free_trial.second_trial:
+                    try:
+                        paid = Paid.objects.get(user = user_profile)
+                        if paid.paid:
+                            print('ok free to use')
+                        else:
+                            print('please refresh payment')
+                    except:
+                        paid = Paid.objects.create(user = user_profile) 
+                        print('please pay')        
+                elif free_trial.first_trial:
+                    print('add gst details to proceed')
+            except:
+                free_trial = FreeTrial.objects.create(user = user_profile)
+                free_trial.end_date = free_trial.start_date + timedelta(days=free_trial.t1)
+                free_trial.save()
+                print('new trial started')
+                print(free_trial.end_date)
+                basic.apply_async(args = [phone_number],countdown =  free_trial.t1)
             user_profile.otp = otp
             user_profile.save()          
             message = Constants.GRAMS_MESSAGE+" {otp} \n {hash}".format(otp = otp, hash = hashValue)
@@ -148,9 +171,9 @@ def health(request):
 def upload_image(request, phone_number):
     if request.method == 'POST':
         profile = Profile.objects.get(phone_number = phone_number)
-        image_obj = Image.objects.create(image = request.POST['image'])
+        image_obj = Image.objects.create(image = 'onion1.jpg')
         print(image_obj.image.url)
-        async_task(run_ml_code)
+        run_ml_code.delay(phone_number)
         heading_msg = "Your results will be available soon"
         content_msg = "Your results will come soon"
         data = {"app_id": Constants.APP_ID, "contents": {"en": content_msg}, "headings": {"en": heading_msg}, "include_external_user_ids": [phone_number] , "chrome_web_image": Constants.CHROME_WEB_IMAGE}
