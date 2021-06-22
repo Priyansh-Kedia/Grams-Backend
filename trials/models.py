@@ -11,7 +11,12 @@ class FreeTrial(models.Model):
     second_trial = models.BooleanField(default=False)
     start_date = models.DateTimeField(auto_now_add=True)
     end_date = models.DateTimeField(blank=True,null=True) 
-    user = models.OneToOneField(Profile,on_delete=models.CASCADE,null=True,blank=True)   
+    user = models.OneToOneField(Profile,on_delete=models.CASCADE,null=True,blank=True)
+
+
+class Plan(models.Model):
+    name = models.CharField(max_length=40)
+
 
 
 class Paid(models.Model):
@@ -23,3 +28,6 @@ class Paid(models.Model):
     end_date = models.DateTimeField(blank=True,null=True)
     paid = models.BooleanField(default=False)
     user = models.OneToOneField(Profile,on_delete=models.CASCADE,null=True,blank=True)   
+    plan = models.ForeignKey(Plan,on_delete=models.CASCADE,null=True,blank=True)
+
+

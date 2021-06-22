@@ -1,4 +1,5 @@
 from re import T
+import re
 from django.shortcuts import render
 from django.http import HttpResponse,JsonResponse
 from django.views.decorators.csrf import csrf_exempt
@@ -19,11 +20,12 @@ from rest_framework.views import APIView
 from rest_framework.parsers import MultiPartParser, FormParser
 from mock import mock
 from datetime import datetime, timedelta
-from trials.models import FreeTrial,Paid
+from trials.models import FreeTrial,Paid, Plan
 import requests
 from urllib.parse import unquote
 from .tasks import run_ml_code
-from grams_backend.celery import basic
+from grams_backend.celery import basic,prompt_payment_renewal
+from trials.serializers import PlanSerializer
 
 
 # OTP #
@@ -70,7 +72,7 @@ def generate_otp(request):
                 free_trial.save()
                 print('new trial started')
                 print(free_trial.end_date)
-                basic.apply_async(args = [phone_number],countdown =  free_trial.t1)
+                basic.apply_async(args = [phone_number],countdown =  free_trial.t1*86400)
             user_profile.otp = otp
             user_profile.save()          
             message = Constants.GRAMS_MESSAGE+" {otp} \n {hash}".format(otp = otp, hash = hashValue)
@@ -159,7 +161,7 @@ def retrieve_address(request):
         return Response(retrieved_address_serializer.data, status = status.HTTP_200_OK)
 
 
-
+        
 
 @api_view(['GET',])
 def health(request):

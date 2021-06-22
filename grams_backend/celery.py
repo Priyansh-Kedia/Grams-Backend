@@ -32,3 +32,12 @@ def basic(phone_number):
     free_trial.first_trial = True
     free_trial.save()
     print('first trial done, start second trial with gst id')
+
+@app.task
+def prompt_payment_renewal(phone_number):
+    profile = Profile.objects.get(phone_number=phone_number)
+    paid = Paid.objects.get(user = profile)
+    paid.paid = False
+    paid.save()
+    print('please renew your payment')
+
