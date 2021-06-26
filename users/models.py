@@ -57,5 +57,7 @@ class Image(models.Model):
 
 class Feedback(models.Model):
     feedback = models.CharField(max_length = 100)
-    profile_id = models.ForeignKey(to = Profile,on_delete = models.CASCADE)
-    date = models.DateField(auto_now=True)
+    user = models.ForeignKey(to = Profile,on_delete = models.CASCADE)
+    date = models.DateField(auto_now=True, null= True)
+    def __str__(self):
+        return str(self.feedback)

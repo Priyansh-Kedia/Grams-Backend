@@ -27,6 +27,10 @@ from .tasks import run_ml_code
 from grams_backend.celery import basic,prompt_payment_renewal
 from trials.serializers import PlanSerializer
 
+import users
+
+from users import models
+
 
 # OTP #
 @api_view(['POST',])
@@ -192,11 +196,16 @@ def feedback(request):
         feedback = request.POST.get(Constants.FEEDBACK)
         profile_id = request.POST.get(Constants.PROFILE_ID)
         try:
-            feedback_obj = Feedback.objects.get(profile_id = profile_id)
+            profile_obj = Profile.objects.get(profile_id = profile_id)
         except:
-            feedback_obj = Feedback.objects.create(profile_id = profile_id)
-        feedback_obj.feedback = feedback
-        return "Feedback Received"
+            return Response({Constants.MESSAGE:'Profile does not exist'}, status = status.HTTP_404_NOT_FOUND)
+        feedback_obj = Feedback.objects.create(feedback = feedback, user = profile_obj)
+        feedback_obj = model_to_dict(feedback_obj)
+        data = {
+            Constants.MESSAGE: "Feedback received successfully",
+            Constants.FEEDBACK : feedback_obj, 
+        }
+        return Response(data, status = status.HTTP_200_OK)
 
 class MyImageView(APIView):
 		def post(self, request, *args, **kwargs):
