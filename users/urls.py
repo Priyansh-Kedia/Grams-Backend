@@ -13,5 +13,6 @@ urlpatterns=[
     path('upload_image/<str:phone_number>', views.upload_image),
     path('health/', views.health, name = 'health'),
     path('upload/', views.MyImageView.as_view()),
+    path('feedback/', views.feedback, name = 'feedback'),
 
 ]

@@ -1,6 +1,6 @@
+from datetime import date
 from django.db import models
 from django.core.validators import RegexValidator
-
 
 phone_regex = RegexValidator(regex = r'^\+\d{4,15}$', message = "Phone number must be entered in the format: '+999999999'. Up to 15 digits allowed.")
 otp_regex = RegexValidator(regex = r'^\d{4}')
@@ -54,3 +54,8 @@ class Image(models.Model):
     name = models.CharField(max_length=50, default='QWERTY')
     def __str__(self):
         return str(self.id)
+
+class Feedback(models.Model):
+    feedback = models.CharField(max_length = 100)
+    profile_id = models.ForeignKey(to = Profile,on_delete = models.CASCADE)
+    date = models.DateField(auto_now=True)

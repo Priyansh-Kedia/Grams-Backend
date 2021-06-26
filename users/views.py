@@ -12,14 +12,14 @@ from . import utils
 from .serializers import OTPSerializer,AddressSerializer,ProfileSerializer, ImageSerializer
 from process_grains.serializers import ScanSerializer
 from main import main
-from .models import Profile, Address, Image
+from .models import Feedback, Profile, Address, Image
 from process_grains.models import Scan
 from grams_backend import Constants
 from rest_framework.decorators import parser_classes
 from rest_framework.views import APIView
 from rest_framework.parsers import MultiPartParser, FormParser
 from mock import mock
-from datetime import datetime, timedelta
+from datetime import date, datetime, timedelta
 from trials.models import FreeTrial,Paid, Plan
 import requests
 from urllib.parse import unquote
@@ -49,6 +49,7 @@ def generate_otp(request):
             data = {Constants.MESSAGE:message, Constants.PROFILE:model_to_dict(user_profile), Constants.IS_VERIFIED:False}
             return Response(data, status = status.HTTP_200_OK) 
         url = Constants.OTP_URL+ Constants.OTP_KEY+ "SMS/" + phone_number + "/" + str(otp)
+        print(url)
         requests.post( url )
         if user_profile:
             
@@ -184,6 +185,18 @@ def upload_image(request, phone_number):
             'data': 'hello',
         }
         return Response(data, status = status.HTTP_200_OK)
+
+@api_view(['POST'])
+def feedback(request):
+    if request.method == "POST":
+        feedback = request.POST.get(Constants.FEEDBACK)
+        profile_id = request.POST.get(Constants.PROFILE_ID)
+        try:
+            feedback_obj = Feedback.objects.get(profile_id = profile_id)
+        except:
+            feedback_obj = Feedback.objects.create(profile_id = profile_id)
+        feedback_obj.feedback = feedback
+        return "Feedback Received"
 
 class MyImageView(APIView):
 		def post(self, request, *args, **kwargs):
