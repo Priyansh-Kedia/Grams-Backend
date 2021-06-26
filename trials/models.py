@@ -27,7 +27,7 @@ class Paid(models.Model):
     start_date = models.DateTimeField(auto_now_add=True)
     end_date = models.DateTimeField(blank=True,null=True)
     paid = models.BooleanField(default=False)
-    user = models.OneToOneField(Profile,on_delete=models.CASCADE,null=True,blank=True)   
+    user = models.OneToOneField(Profile,on_delete=models.CASCADE,null=True,blank=True,related_name='user')   
     plan = models.ForeignKey(Plan,on_delete=models.CASCADE,null=True,blank=True)
 
 

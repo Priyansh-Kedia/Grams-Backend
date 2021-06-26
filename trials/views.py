@@ -7,6 +7,8 @@ from .models import FreeTrial,Paid,Plan
 from .serializers import PaidSerializer, PlanSerializer
 from grams_backend.celery import prompt_payment_renewal
 from datetime import datetime,timedelta
+from grams_backend.enums import TrialResponse
+from grams_backend.celery import basic
 
 @api_view(['GET'])
 def plan_status(request,phone_number):
@@ -15,32 +17,26 @@ def plan_status(request,phone_number):
         data  = {}
         try:
             free_trial = FreeTrial.objects.get(user = profile)
+            print(free_trial.second_trial)
             if free_trial.first_trial and free_trial.second_trial:
-                    try:
-                        paid = Paid.objects.get(user =profile)
-                        if paid.paid:
-                               data ['plan'] = 'paid'
-                               data['start_date'] = paid.start_date
-                               data['end_date'] = paid.end_date
-                               return Response(data, status=status.HTTP_200_OK)                 
-                        else:
-                            data ['plan'] = 'paid but expired'
-                            data['start_date'] = paid.start_date
-                            data['end_date'] = paid.end_date
-                            return Response(data, status=status.HTTP_200_OK) 
-                    except:
-                        data ['plan'] = 'both trials done'
-                        data['start_date'] =free_trial.start_date
-                        data['end_date'] = free_trial.end_date
-                        return Response(data, status=status.HTTP_200_OK)        
+                try:
+                    paid = profile.user
+                    data ['plan'] = TrialResponse.PAID
+                    data['start_date'] = paid.start_date
+                    data['end_date'] = paid.end_date 
+                except:
+                    data['plan'] = TrialResponse.TRIAL2
+                    data['start_date'] = free_trial.start_date
+                    data['end_date'] = free_trial.end_date 
             elif free_trial.first_trial:
-                data ['plan'] = 'first trial done'
+                data['plan'] = TrialResponse.TRIAL1
                 data['start_date'] = free_trial.start_date
-                data['end_date'] = free_trial.end_date
-                return Response(data, status=status.HTTP_200_OK)      
+                data['end_date'] = free_trial.end_date     
         except:
-            data ['plan'] = 'not started'
-            return Response(data, status=status.HTTP_200_OK)
+            free_trial = FreeTrial.objects.create(user = profile)
+            basic.apply_async(args = [phone_number],countdown =  free_trial.t1*86400)  
+            data ['plan'] = TrialResponse.TRIAL1 
+        return Response(data, status=status.HTTP_200_OK)
 
 @api_view(['GET'])
 def get_all_plans(request):
