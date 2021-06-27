@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import Plan,Paid
+from .models import Plan,CurrentStatus
 
 class PlanSerializer(serializers.ModelSerializer):
 
@@ -7,9 +7,8 @@ class PlanSerializer(serializers.ModelSerializer):
         model = Plan
         fields = '__all__'
 
-
-class PaidSerializer(serializers.ModelSerializer):
+class CurrentStatusSerializer(serializers.ModelSerializer):
 
     class Meta:
-        model = Paid
-        fields = '__all__'        
+        model = CurrentStatus
+        fields = '__all__'

@@ -5,10 +5,9 @@ os.environ.setdefault('DJANGO_SETTINGS_MODULE','grams_backend.settings')
 import django
 django.setup()
 
-from trials.models import FreeTrial,Paid
 from users.models import Profile
-
-
+from trials.models import Plan,CurrentStatus
+from .enums import TrialResponse
 
 app = Celery('grams_backend')
 
@@ -28,16 +27,17 @@ def debug_task(self):
 @app.task
 def basic(phone_number):
     profile = Profile.objects.get(phone_number=phone_number)
-    free_trial = FreeTrial.objects.get(user = profile)
-    free_trial.first_trial = True
-    free_trial.save()
+    current = CurrentStatus.objects.get(user = profile)
+    plan = Plan.objects.get(name = TrialResponse.FREETRIAL2) 
     print('first trial done, start second trial with gst id')
+    current.plan = plan
+    current.save()
 
 @app.task
 def prompt_payment_renewal(phone_number):
     profile = Profile.objects.get(phone_number=phone_number)
-    paid = Paid.objects.get(user = profile)
-    paid.paid = False
-    paid.save()
+    current = CurrentStatus.objects.get(user = profile)
+    current.paid = False
+    current.save()
     print('please renew your payment')
 

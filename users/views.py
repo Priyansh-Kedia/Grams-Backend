@@ -20,11 +20,9 @@ from rest_framework.views import APIView
 from rest_framework.parsers import MultiPartParser, FormParser
 from mock import mock
 from datetime import date, datetime, timedelta
-from trials.models import FreeTrial,Paid, Plan
 import requests
 from urllib.parse import unquote
 from .tasks import run_ml_code
-from grams_backend.celery import basic,prompt_payment_renewal
 from trials.serializers import PlanSerializer
 
 import users
@@ -57,27 +55,27 @@ def generate_otp(request):
         requests.post( url )
         if user_profile:
             
-            try:
-                free_trial = FreeTrial.objects.get(user = user_profile)
-                if free_trial.first_trial and free_trial.second_trial:
-                    try:
-                        paid = Paid.objects.get(user = user_profile)
-                        if paid.paid:
-                            print('ok free to use')
-                        else:
-                            print('please refresh payment')
-                    except:
-                        paid = Paid.objects.create(user = user_profile) 
-                        print('please pay')        
-                elif free_trial.first_trial:
-                    print('add gst details to proceed')
-            except:
-                free_trial = FreeTrial.objects.create(user = user_profile)
-                free_trial.end_date = free_trial.start_date + timedelta(days=free_trial.t1)
-                free_trial.save()
-                print('new trial started')
-                print(free_trial.end_date)
-                basic.apply_async(args = [phone_number],countdown =  free_trial.t1*86400)
+            # try:
+            #     free_trial = FreeTrial.objects.get(user = user_profile)
+            #     if free_trial.first_trial and free_trial.second_trial:
+            #         try:
+            #             paid = Paid.objects.get(user = user_profile)
+            #             if paid.paid:
+            #                 print('ok free to use')
+            #             else:
+            #                 print('please refresh payment')
+            #         except:
+            #             paid = Paid.objects.create(user = user_profile) 
+            #             print('please pay')        
+            #     elif free_trial.first_trial:
+            #         print('add gst details to proceed')
+            # except:
+            #     free_trial = FreeTrial.objects.create(user = user_profile)
+            #     free_trial.end_date = free_trial.start_date + timedelta(days=free_trial.t1)
+            #     free_trial.save()
+            #     print('new trial started')
+            #     print(free_trial.end_date)
+            #     basic.apply_async(args = [phone_number],countdown =  free_trial.t1*86400)
             user_profile.otp = otp
             user_profile.save()          
             message = Constants.GRAMS_MESSAGE+" {otp} \n {hash}".format(otp = otp, hash = hashValue)
