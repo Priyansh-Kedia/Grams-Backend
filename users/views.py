@@ -23,7 +23,8 @@ from datetime import date, datetime, timedelta
 import requests
 from urllib.parse import unquote
 from .tasks import run_ml_code
-from trials.serializers import PlanSerializer
+from trials.serializers import PlanSerializer,CurrentStatusSerializer
+from trials.models import CurrentStatus
 
 import users
 
@@ -177,17 +178,18 @@ def health(request):
 def upload_image(request, phone_number):
     if request.method == 'POST':
         profile = Profile.objects.get(phone_number = phone_number)
-        image_obj = Image.objects.create(image = 'onion1.jpg')
+        image_obj = Image.objects.create(image = request.FILES['image'])
         print(image_obj.image.url)
-        run_ml_code.delay(phone_number)
+        run_ml_code.delay(phone_number,image_obj.image.url)
         heading_msg = "Your results will be available soon"
         content_msg = "Your results will come soon"
         data = {"app_id": Constants.APP_ID, "contents": {"en": content_msg}, "headings": {"en": heading_msg}, "include_external_user_ids": [phone_number] , "chrome_web_image": Constants.CHROME_WEB_IMAGE}
         requests.post(Constants.API_URL,headers={"Authorization": "Basic "+Constants.API_KEY}, json=data)
-        data = {
-            'data': 'hello',
-        }
-        return Response(data, status = status.HTTP_200_OK)
+        current = CurrentStatus.objects.get(user = profile)
+        current.no_of_readings -= 1
+        current.save()
+        current_serializer = CurrentStatusSerializer(current)
+        return Response(current_serializer.data, status = status.HTTP_200_OK)
 
 @api_view(['POST'])
 def feedback(request):
