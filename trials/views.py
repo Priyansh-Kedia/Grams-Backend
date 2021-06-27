@@ -18,12 +18,10 @@ from grams_backend.enums import TrialResponse
 def plan_status(request,phone_number):
     if request.method == 'GET':
         profile = Profile.objects.get(phone_number = phone_number)
-        current,_ = CurrentStatus.objects.get_or_create(user = profile)
-        plan = Plan.objects.get(name = TrialResponse.TRIAL1)    
+        current,_ = CurrentStatus.objects.get_or_create(user = profile)   
         if current.plan is None:
-            current.plan = plan
+            current.name = TrialResponse.TRIAL1
             current.save()
-            basic.apply_async(args = [phone_number],countdown =  FREETRIAL1_DAYS*86400)
         current_serializer = CurrentStatusSerializer(current)
         return Response(current_serializer.data, status=status.HTTP_200_OK)
 

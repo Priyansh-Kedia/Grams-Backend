@@ -21,5 +21,5 @@ class CurrentStatus(models.Model):
     paid = models.BooleanField(default=False)
     user = models.OneToOneField(Profile,on_delete=models.CASCADE,null=True,blank=True,related_name='user')   
     plan = models.ForeignKey(Plan,on_delete=models.CASCADE,null=True,blank=True,related_name='plan')
-
+    name = models.CharField(max_length=40,null=True,blank=True)
 
