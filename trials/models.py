@@ -10,6 +10,7 @@ class Plan(models.Model):
     price = models.IntegerField(blank=True,null=True)
     readings = models.IntegerField(null=True,blank=True,default=-1)
     no_of_days = models.IntegerField(default=30)
+    discount = models.IntegerField(null=True,blank=True,default=0)
 
     def __str__(self):
         return self.name
