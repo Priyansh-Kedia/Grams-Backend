@@ -19,10 +19,12 @@ def plan_status(request,phone_number):
     if request.method == 'GET':
         profile = Profile.objects.get(phone_number = phone_number)
         current,_ = CurrentStatus.objects.get_or_create(user = profile)   
-        if current.plan is None:
+        if not current.name:
             current.name = TrialResponse.TRIAL1
+            current.end_date = datetime.now()+timedelta(FREETRIAL1_DAYS)
             current.save()
         current_serializer = CurrentStatusSerializer(current)
+        print(current_serializer.data)
         return Response(current_serializer.data, status=status.HTTP_200_OK)
 
 @api_view(['GET'])

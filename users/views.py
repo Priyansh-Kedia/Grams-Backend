@@ -124,7 +124,8 @@ def update_profile(request):
 @api_view(['GET',])
 def retrieve_profile(request):
     if request.method == "GET":
-        phone_number = request.GET.get(Constants.PHONE_NUMBER, None)
+        phone_number = request.GET['phone_number']
+        print(phone_number)
         try:
             profile_obj = Profile.objects.get(phone_number = phone_number)
         except Profile.DoesNotExist:

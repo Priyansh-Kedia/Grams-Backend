@@ -8,18 +8,18 @@ from users.models import Profile
 class Plan(models.Model):
     name = models.CharField(max_length=40)
     price = models.IntegerField(blank=True,null=True)
-    readings =models.IntegerField(null=True,blank=True)
+    readings = models.IntegerField(null=True,blank=True,default=-1)
     no_of_days = models.IntegerField(default=30)
 
-def __str__(self):
-    return self.name
+    def __str__(self):
+        return self.name
 
 
 class CurrentStatus(models.Model):
     start_date = models.DateTimeField(auto_now=True)
     end_date = models.DateTimeField(blank=True,null=True)
-    paid = models.BooleanField(default=False)
     user = models.OneToOneField(Profile,on_delete=models.CASCADE,null=True,blank=True,related_name='user')   
     plan = models.ForeignKey(Plan,on_delete=models.CASCADE,null=True,blank=True,related_name='plan')
     name = models.CharField(max_length=40,null=True,blank=True)
+    no_of_readings = models.IntegerField(null=True,blank=True,default=10)
 
