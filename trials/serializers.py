@@ -17,4 +17,5 @@ class CurrentStatusSerializer(serializers.ModelSerializer):
     def to_representation(self, instance):
         response =  super().to_representation(instance)
         response['user'] = ProfileSerializer(instance.user).data
+        response['plan'] = PlanSerializer(instance.plan).data
         return response
