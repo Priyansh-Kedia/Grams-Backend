@@ -36,7 +36,7 @@ def get_all_plans(request):
 @api_view(['POST'])
 def update_payment_status(request):
     phone_number = request.POST['phone_number']
-    pk = request.POST['pk']
+    pk = request.POST['id']
     profile = Profile.objects.get(phone_number= phone_number)
     current = CurrentStatus.objects.get(user = profile)
     paid_plan = Plan.objects.get(pk =pk)
