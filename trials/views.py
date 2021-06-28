@@ -41,7 +41,7 @@ def update_payment_status(request):
     current = CurrentStatus.objects.get(user = profile)
     paid_plan = Plan.objects.get(pk =pk)
     current.plan = paid_plan
-    current.end_date = datetime.now()+timedelta(paid_plan.no_of_days)
+    current.end_date = current.end_date+timedelta(paid_plan.no_of_days)
     current.no_of_readings = current.no_of_readings+ paid_plan.readings
     current.name = TrialResponse.PAID
     current.save()
