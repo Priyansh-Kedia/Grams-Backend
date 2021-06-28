@@ -30,3 +30,4 @@ CHROME_WEB_IMAGE = 'https://images.ctfassets.net/hrltx12pl8hq/7yQR5uJhwEkRfjwMFJ
 FEEDBACK = "feedback"
 FREETRIAL1_DAYS = 15
 FREETRIAL2_DAYS = 15
+FREETRIAL2_READINGS = 10

@@ -36,12 +36,14 @@ def get_all_plans(request):
 @api_view(['POST'])
 def update_payment_status(request):
     phone_number = request.POST['phone_number']
+    pk = request.POST['pk']
     profile = Profile.objects.get(phone_number= phone_number)
     current = CurrentStatus.objects.get(user = profile)
-    paid_plan = Plan.objects.get(name = TrialResponse.PAID)
+    paid_plan = Plan.objects.get(pk =pk)
     current.plan = paid_plan
     current.end_date = datetime.now()+timedelta(paid_plan.no_of_days)
     current.no_of_readings = current.no_of_readings+ paid_plan.readings
+    current.name = TrialResponse.PAID
     current.save()
     prompt_payment_renewal.apply_async(args = [phone_number],countdown =  paid_plan.no_of_days*86400)
     current_serializer = CurrentStatusSerializer(current)

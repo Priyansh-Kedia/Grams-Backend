@@ -1,3 +1,4 @@
+from grams_backend.enums import TrialResponse
 from re import T
 import re
 from django.shortcuts import render
@@ -55,28 +56,6 @@ def generate_otp(request):
         print(url)
         requests.post( url )
         if user_profile:
-            
-            # try:
-            #     free_trial = FreeTrial.objects.get(user = user_profile)
-            #     if free_trial.first_trial and free_trial.second_trial:
-            #         try:
-            #             paid = Paid.objects.get(user = user_profile)
-            #             if paid.paid:
-            #                 print('ok free to use')
-            #             else:
-            #                 print('please refresh payment')
-            #         except:
-            #             paid = Paid.objects.create(user = user_profile) 
-            #             print('please pay')        
-            #     elif free_trial.first_trial:
-            #         print('add gst details to proceed')
-            # except:
-            #     free_trial = FreeTrial.objects.create(user = user_profile)
-            #     free_trial.end_date = free_trial.start_date + timedelta(days=free_trial.t1)
-            #     free_trial.save()
-            #     print('new trial started')
-            #     print(free_trial.end_date)
-            #     basic.apply_async(args = [phone_number],countdown =  free_trial.t1*86400)
             user_profile.otp = otp
             user_profile.save()          
             message = Constants.GRAMS_MESSAGE+" {otp} \n {hash}".format(otp = otp, hash = hashValue)
@@ -120,6 +99,14 @@ def update_profile(request):
         if not profile_serializer.is_valid():
             return Response({Constants.MESSAGE:profile_serializer.errors}, status = status.HTTP_422_UNPROCESSABLE_ENTITY)
         updated_profile = profile_serializer.update(instance = Profile.objects.get(profile_id = profile_id))
+        print(updated_profile.name)
+        current = CurrentStatus.objects.get(user = updated_profile)
+        if updated_profile.gst_no and current.name == TrialResponse.TRIAL1:
+            current.name = TrialResponse.TRIAL2
+            current.end_date = current.end_date + timedelta(Constants.FREETRIAL2_DAYS)
+            current.no_of_readings += Constants.FREETRIAL2_READINGS
+            current.save()
+        print(current.name)
         return Response(model_to_dict(updated_profile), status = status.HTTP_200_OK)
 
 @api_view(['GET',])
