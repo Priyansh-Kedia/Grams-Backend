@@ -38,3 +38,14 @@ def r_pre_save_receiever(sender,instance,*args,**kwargs):
 pre_save.connect(r_pre_save_receiever, sender=Scan)
 
 # Create your models here.
+
+class Type(models.Model):
+    type = models.CharField(max_length = 100)
+    def __str__(self) -> str:
+        return self.type
+
+class SubType(models.Model):
+    type = models.ForeignKey(to = Type, on_delete=models.CASCADE)
+    subtype = models.CharField(max_length = 100)
+    def __str__(self) -> str:
+        return self.subtype
