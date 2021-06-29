@@ -1,5 +1,5 @@
 from grams_backend.enums import TrialResponse
-from re import T
+from re import T, sub
 import re
 from django.shortcuts import render
 from django.http import HttpResponse,JsonResponse
@@ -166,12 +166,14 @@ def upload_image(request, phone_number):
     if request.method == 'POST':
         profile = Profile.objects.get(phone_number = phone_number)
         image_obj = Image.objects.create(image = request.FILES['image'])
+        item_type = request.POST['type']
+        sub_type = request.POST['sub_type']
         print(image_obj.image.url)
-        run_ml_code.delay(phone_number,image_obj.image.url)
-        heading_msg = "Your results will be available soon"
-        content_msg = "Your results will come soon"
-        data = {"app_id": Constants.APP_ID, "contents": {"en": content_msg}, "headings": {"en": heading_msg}, "include_external_user_ids": [phone_number] , "chrome_web_image": Constants.CHROME_WEB_IMAGE}
-        requests.post(Constants.API_URL,headers={"Authorization": "Basic "+Constants.API_KEY}, json=data)
+        run_ml_code.delay(phone_number,image_obj.image.url,item_type,sub_type)
+        # heading_msg = "Your results will be available soon"
+        # content_msg = "Your results will come soon"
+        # data = {"app_id": Constants.APP_ID, "contents": {"en": content_msg}, "headings": {"en": heading_msg}, "include_external_user_ids": [phone_number] , "chrome_web_image": Constants.CHROME_WEB_IMAGE}
+        # requests.post(Constants.API_URL,headers={"Authorization": "Basic "+Constants.API_KEY}, json=data)
         current = CurrentStatus.objects.get(user = profile)
         current.no_of_readings -= 1
         current.save()

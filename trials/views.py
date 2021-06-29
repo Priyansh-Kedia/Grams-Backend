@@ -30,6 +30,7 @@ def plan_status(request,phone_number):
 @api_view(['GET'])
 def get_all_plans(request):
     plan = Plan.objects.all()
+    print(plan)
     plan_serializer = PlanSerializer(plan,many = True)
     return Response(plan_serializer.data, status=status.HTTP_200_OK)
 
