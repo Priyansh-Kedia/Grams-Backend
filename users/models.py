@@ -1,6 +1,6 @@
+from datetime import date
 from django.db import models
 from django.core.validators import RegexValidator
-
 
 phone_regex = RegexValidator(regex = r'^\+\d{4,15}$', message = "Phone number must be entered in the format: '+999999999'. Up to 15 digits allowed.")
 otp_regex = RegexValidator(regex = r'^\d{4}')
@@ -15,6 +15,7 @@ class Profile(models.Model):
     otp = models.IntegerField(validators = [otp_regex], null = True, blank = True)
     otp_timestamp = models.DateTimeField(auto_now = True, verbose_name = "OTP Created On")
     profile_id = models.AutoField(primary_key=True, name='profile_id')
+    gst_no = models.CharField(max_length = 15,blank=True,null=True)
 
     def __str__(self):
         return self.phone_number
@@ -27,8 +28,6 @@ class Profile(models.Model):
     @classmethod
     def getAllScans(cls, user_id):
         profile = cls.objects.get(pk = user_id)
-        # print(profile)
-        # print(profile.scan_set.all())
         return profile.scan_set.all() 
 
 
@@ -55,3 +54,10 @@ class Image(models.Model):
     name = models.CharField(max_length=50, default='QWERTY')
     def __str__(self):
         return str(self.id)
+
+class Feedback(models.Model):
+    feedback = models.CharField(max_length = 100)
+    user = models.ForeignKey(to = Profile,on_delete = models.CASCADE)
+    date = models.DateField(auto_now=True, null= True)
+    def __str__(self):
+        return str(self.feedback)

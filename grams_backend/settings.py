@@ -44,9 +44,11 @@ INSTALLED_APPS = [
     # local apps
     'users.apps.UsersConfig',
     'process_grains.apps.ProcessGrainsConfig',
+    'trials.apps.TrialsConfig',
 
     # api
     'rest_framework',
+    'django_apscheduler',
 
     # celery
     'django_celery_beat',
@@ -160,5 +162,9 @@ CELERY_BEAT_SCHEDULE = {
 # Specifies to use same database as django
 CELERY_RESULT_BACKEND = 'django-db'
 CELERY_CACHE_BACKEND = 'django-cache'
+CELERY_BROKER_URL = 'redis://127.0.0.1:6379'
 
+CELERY_ACCEPT_CONTENT = ['application/json']
+CELERY_RESULT_SERIALIZER = 'json'
+CELERY_TASK_SERIALIZER = 'json'
 django_heroku.settings(locals())

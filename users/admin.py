@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import Profile, Address, Image
+from .models import Feedback, Profile, Address, Image
 
 class ProfileAdmin(admin.ModelAdmin):
     readonly_fields = ('otp_timestamp', )
@@ -8,3 +8,4 @@ class ProfileAdmin(admin.ModelAdmin):
 admin.site.register(Address)
 admin.site.register(Profile, ProfileAdmin)
 admin.site.register(Image)
+admin.site.register(Feedback)
