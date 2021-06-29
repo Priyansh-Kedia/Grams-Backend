@@ -1,33 +1,132 @@
 import cv2
-import time as t
-import numpy as np
+import math
 import argparse
+import numpy as np
+from matplotlib import pyplot as p
 
-import pixel_length_mapping as plm
-
+import ArucoBox
+import poseSegmentation
 
 
 def ArgParse():
-        # Construct the argument parser and parse the arguments
-        ap = argparse.ArgumentParser()
+    # Construct the argument parser and parse the arguments
+    ap = argparse.ArgumentParser()
 
-        ap.add_argument("imgPath", help="Path of the input image")
-        ap.add_argument("-d", "--Diameter", type=int, default=20, help="Diameter used in cellpose")
-        ap.add_argument("-df", "--Downscale_Factor", type=float, default=0.25, help="Downscale factor of the image")
-        ap.add_argument("-uf", "--Upscale_Factor", type=float, default=4, help="Upscale factor of the image")
+    ap.add_argument("imgPath", help="Path of the input image")
 
-        args = vars(ap.parse_args())
+    args = vars(ap.parse_args())
 
-        return args
+    return args
 
 
-def GetAvg(Contour_Dict):
-    Values = np.asarray(list(Contour_Dict.values()))
+def Distance(Pt1, Pt2):
+    return math.sqrt( ( (Pt1[1] - Pt2[1]) ** 2 ) + ( (Pt1[0] - Pt2[0]) ** 2 ) )
 
-    Mean = np.mean(Values, axis=0)
+def TransformBox(Image, BoxCorners):
+    # Assumed that orientation is clockwise and starting from top left
+    Width = int((Distance(BoxCorners[0], BoxCorners[1]) + Distance(BoxCorners[2], BoxCorners[3])) / 2)
+    Height = int((Distance(BoxCorners[1], BoxCorners[2]) + Distance(BoxCorners[3], BoxCorners[0])) / 2)
+    if Width > Height:
+        Width, Height = Height, Width
+        BoxCorners = BoxCorners[1:] + BoxCorners[:1]
 
-    return Mean
+    FinalPoints = np.float32([[0, 0],
+                              [Width-1, 0], 
+                              [0, Height-1], 
+                              [Width-1, Height-1]])
 
+    # Correcting order of initial points (BoxCorners)
+    BoxCorners[2], BoxCorners[3] = BoxCorners[3], BoxCorners[2]
+    BoxCorners = np.asarray(BoxCorners, dtype=np.float32)
+
+    # Applying prespective transformation.
+    ProjectiveMatrix = cv2.getPerspectiveTransform(BoxCorners, FinalPoints)
+    ImageTransformed = cv2.warpPerspective(Image, ProjectiveMatrix, (Width, Height))
+
+    return ImageTransformed
+
+
+def ExtractBox(Image, minBoxDimsPer_Ori=0.95, ThVal=100):
+    if not (0 <= ThVal <= 255):
+        return None
+    Height, Width = Image.shape[:2]
+    
+    # Converting to gray
+    GrayImage = cv2.cvtColor(Image, cv2.COLOR_BGR2GRAY)
+
+    while True:
+        minBoxDimsPer = minBoxDimsPer_Ori
+
+        # Thresholding for box
+        Th = cv2.threshold(GrayImage, ThVal, 255, cv2.THRESH_BINARY_INV)[1]
+
+        # Getting contours and finding the box's contour
+        Contours = cv2.findContours(Th, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_NONE)[-2]
+        BBs = [cv2.boundingRect(Contour) for Contour in Contours]
+        
+        Box_Contour = None
+        while minBoxDimsPer > 0.5 and Box_Contour is None:
+            min_Box_Height, min_Box_Width = int(Height * minBoxDimsPer), int(Width * minBoxDimsPer)
+            for i in range(len(BBs)):
+                if BBs[i][2] >= min_Box_Width and BBs[i][3] >= min_Box_Height:
+                    Box_Contour = Contours[i].copy()
+                    break
+            minBoxDimsPer -= 0.03
+
+        if Box_Contour is not None:
+            break
+        ThVal += 10
+
+    BB = cv2.boundingRect(Box_Contour)
+    ImageCropped = Image[BB[1]+2 : BB[1]+BB[3]-2, BB[0]+2 : BB[0]+BB[2]-2].copy()
+
+    return ImageCropped
+
+
+def TransformExtractBox_GetMap(Image, OriDistBetArucoCorners=(23.47, 17.26)):
+    # Getting aruco box points
+    BoxCorners = ArucoBox.GetBox(Image, NumOfMarkers=4)
+    if BoxCorners is None:
+        print("\nAll markers not found properly.\nRetake the image.\n")
+        return -1
+
+    # Transforming image
+    Image = TransformBox(Image, BoxCorners.copy())
+
+    # Getting Map : (Pixel Height, Pixel Width)
+    h, w = Image.shape[:2]
+    PixelMapping = (OriDistBetArucoCorners[0] / h, OriDistBetArucoCorners[1] / w)
+    
+    # # Extracting the box
+    # Image = ExtractBox(Image)
+
+    return Image, PixelMapping
+
+
+def CalcRescaleFactors(ImgH, ImgW, RefH=1755, RefW=1275):
+    RatioW = RefW / ImgW
+    RatioH = RefH / ImgH
+
+    Ratio = min(RatioW, RatioH)
+
+    RF = float(str(0.05 * round(Ratio / 0.05))[:5])
+    return RF, 1/RF
+
+
+def NumberGrain(Image, Contours, StartingIndex=1, FontScale=0.65, Thickness=1):
+    Font = cv2.FONT_HERSHEY_SIMPLEX
+    Colour = (0, 0, 255)
+
+    ImageCopy1 = Image.copy()
+    cv2.drawContours(ImageCopy1, Contours, -1, (0, 255, 0), 1)
+
+    for i in range(len(Contours)):
+        Contour = Contours[i]
+        x, y, w, h = cv2.boundingRect(Contour)
+        BottomLeftPoint = ( x + w//5, y + h//2)
+        ImageCopy1 = cv2.putText(ImageCopy1, str(i+StartingIndex), BottomLeftPoint, Font, FontScale, Colour, Thickness, cv2.LINE_AA)
+
+    return ImageCopy1
 
 
 def FindParams(Contour, Mapping):
@@ -37,18 +136,31 @@ def FindParams(Contour, Mapping):
     Area = cv2.contourArea(Contour)
     ParamsList.append(Area * Mapping[0] * Mapping[1])
 
-    # Width and Length
+    # Width and Height
     Rect = cv2.minAreaRect(Contour)
-    ParamsList.append(Rect[1][0] * Mapping[0])       # Width
-    ParamsList.append(Rect[1][1] * Mapping[1])       # Length
-    ParamsList.append((Rect[1][0] * Mapping[0]) / (Rect[1][1] * Mapping[1]))       # Width/Length
+    ParamsList.append(Rect[1][0] * Mapping[1])       # Width
+    ParamsList.append(Rect[1][1] * Mapping[0])       # Height
+    try:
+        ParamsList.append((Rect[1][0] * Mapping[1]) / (Rect[1][1] * Mapping[0]))       # Width/Height
+    except:
+        ParamsList.append(-1)
 
     # Circularity
     Perimeter = cv2.arcLength(Contour, True)
-    Circularity = 4 * np.pi * (Area / (Perimeter * Perimeter))
+    try:
+        Circularity = 4 * np.pi * (Area / (Perimeter * Perimeter))
+    except:
+        Circularity = 1.0
     ParamsList.append(Circularity)
 
     return ParamsList
+
+
+def GetAvg(Contour_Dict):
+    Values = np.asarray(list(Contour_Dict.values()))
+    Mean = np.mean(Values, axis=0)
+
+    return Mean
 
 
 def getData(Contours, Mapping):
@@ -61,142 +173,37 @@ def getData(Contours, Mapping):
     from pandas import DataFrame, Series
     df = DataFrame(dict([ (k,Series(v)) for k,v in Contour_Dict.items() ]))
     df = df.T
-    df.to_csv("Output.csv", header=False, index=False) 
+    df.to_csv("Grain_AppData.csv", header=False, index=False) 
     
     Mean = GetAvg(Contour_Dict)
     
     return list([len(Contours)]) + list(Mean)
 
 
-def DeleteMarkerContour(Contours, Corners):
-    NewContours = []
+def main(ImagePath):
+    # Reading image
+    Image = cv2.imread(ImagePath)
 
-    for Contour in Contours:
-        Flag = True      # Append if true
-        for Corner in Corners:
-            Coordinates = Corner[0][0]
-            dist = cv2.pointPolygonTest(Contour, tuple(Coordinates), False)
-            if dist != -1:
-                Flag = False 
-                break
-        
-        if Flag:
-            NewContours.append(Contour)
+    # Transform and extract box
+    Image, PixelMapping = TransformExtractBox_GetMap(Image)
 
-    return np.asarray(NewContours, dtype=type(Contours))
+    # Calculating downcale and upscale factors
+    DownscaleFactor, UpscaleFactor = CalcRescaleFactors(Image.shape[0], Image.shape[1])
 
-
-def NumberGrain(Image, Upscale_Factor, Contours, StartingIndex=1):
-    # Upscaling it again
-    Image = cv2.resize(Image, (0, 0), fx=Upscale_Factor, fy=Upscale_Factor)
-
-    Font = cv2.FONT_HERSHEY_SIMPLEX
-    FontScale = 0.6
-    Thickness = 1
-    Colour = (0, 0, 255)
-
-    ImageCopy1 = Image.copy()
-    cv2.drawContours(ImageCopy1, Contours, -1, (0, 255, 0), 1)
-
-    for i in range(len(Contours)):
-        Contour = Contours[i]
-        x, y, w, h = cv2.boundingRect(Contour)
-        BottomLeftPoint = ( x + w//3, y + (2*h)//3)
-        ImageCopy1 = cv2.putText(ImageCopy1, str(i+StartingIndex), BottomLeftPoint, Font, FontScale, Colour, Thickness, cv2.LINE_AA)
-
-    cv2.imwrite("NumberedImg.jpg", ImageCopy1)
-
-    return ImageCopy1
-
-
-
-def outlines_list_Fast(masks, DF, UF):
-    GrainDim = int(200 * DF * UF)
-
-    uni = np.unique(masks, return_index=True)
-
-    toXY = []
-    for i in range(len(uni[1])):
-        toXY.append([uni[1][i] % masks.shape[1], uni[1][i] // masks.shape[1]])
-
-    outlines = []
-    for i in range(1, len(uni[0])):
-        startPt = toXY[i]
-        y1 = max(startPt[1] - 5, 0)
-        x1 = max(startPt[0] - (GrainDim * 2), 0)
-        y2 = min(masks.shape[0]-1, startPt[1] + GrainDim*3)
-        x2 = min(masks.shape[1]-1, startPt[0] + (GrainDim * 2))
-
-        GrainROI = masks[y1:y2+1, x1:x2+1]
-
-        GrainROI_n = GrainROI == uni[0][i]
-
-        Contour = cv2.findContours(GrainROI_n.astype(np.uint8), cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_NONE)[-2][0]
-
-        outline = []
-        for j in range(len(Contour)):
-            outline.append(np.array([Contour[j][0][0] + x1, Contour[j][0][1] + y1], dtype=int))
-        outlines.append(np.asarray(outline, dtype=int))
-
-    return outlines
-
-
-
-def SegmentCellpose(img, Diameter, Downscale_Factor, Upscale_Factor):
-    import Compiled as cc
-
-    # Global variables shifted here
-    use_GPU = cc.use_gpu()
-    print('GPU activated? %d'%use_GPU)
-
-    # model_type='cyto' or model_type='nuclei'
-    Model = cc.Pose(gpu=use_GPU, model_type='cyto', net_avg=False, Upscale_Factor=Upscale_Factor)
-
-    masks, flows, styles, diams = Model.eval(img, diameter=Diameter, channels=[0, 0], do_3D=False)
-
-    outlinesStart = t.time()
-    outlines = outlines_list_Fast(masks, Downscale_Factor, Upscale_Factor)
-    print("Time Taken for calculating outlines: {}".format(t.time() - outlinesStart))
+    # Applying cellpose segmentation
+    Outlines = poseSegmentation.ApplyCellpose(Image, DownscaleFactor=DownscaleFactor, UpscaleFactor=UpscaleFactor, 
+                                              SaveOutlines=True, ShowContoursImage=False, CorrectOutlinesFlag=True)
 
     # Numbering grains
-    NumberedImg = NumberGrain(img.copy(), Upscale_Factor, outlines, StartingIndex=1)
+    NumberedImage = NumberGrain(Image, Outlines)
 
-    Contours = []
-    for outline in outlines:
-        contour = []
-        for i in range(len(outline)):
-            contour.append(np.array([np.asarray([outline[i][0], outline[i][1]], dtype=np.int32)], dtype=np.int32))
-        Contours.append(np.asarray(contour, dtype=np.int32))
+    # Getting grain data
+    GrainData = getData(Outlines, PixelMapping)
 
-    return Contours, NumberedImg
-
-
-def main(ImagePath, Diameter, Downscale_Factor, Upscale_Factor=4):
-    Image = cv2.imread(ImagePath)
-    DownsizedImage = cv2.resize(Image, (0, 0), fx=Downscale_Factor, fy=Downscale_Factor)
-    if (Downscale_Factor*Upscale_Factor) != 1.0:
-        FinalImage = cv2.resize(Image, (0, 0), fx=(Downscale_Factor*Upscale_Factor), fy=(Downscale_Factor*Upscale_Factor))
-    else:
-        FinalImage = Image.copy()
-
-    Contours, NumberedImage = SegmentCellpose(DownsizedImage, Diameter, Downscale_Factor, Upscale_Factor)
-
-    # Map pixel length
-    Flag, Mapping, Corners, _ = plm.MapPixels_Avg(FinalImage, (5, 5), 1)
-    if not Flag:
-        print("\nAruco markers not found properly.")
-        print("Retake the image.\n")
-
-    else:
-        Contours = DeleteMarkerContour(Contours, Corners)
-    
-    finalData = getData(Contours, Mapping)
-
-    return finalData, NumberedImage
+    return GrainData, NumberedImage
 
 
 if __name__ == "__main__":
-        args = ArgParse()
+    args = ArgParse()
 
-        results, _ = main(args["imgPath"], args["Diameter"], args["Downscale_Factor"], Upscale_Factor=args["Upscale_Factor"])
-        print(results)
+    results, _ = main(args["imgPath"])

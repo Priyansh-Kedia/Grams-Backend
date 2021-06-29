@@ -1726,11 +1726,6 @@ import tifffile
 
 # from . import utils, plot, transforms
 
-try:
-    from PyQt5 import QtGui, QtCore, Qt, QtWidgets
-    GUI = True
-except:
-    GUI = False
 
 try:
     import matplotlib.pyplot as plt
@@ -1738,11 +1733,8 @@ try:
 except:
     MATPLOTLIB = False
 
-try:
-    from google.cloud import storage
-    SERVER_UPLOAD = True
-except:
-    SERVER_UPLOAD = False
+GUI = False
+SERVER_UPLOAD = False
 
 
 def outlines_to_text(base, outlines):
@@ -2039,88 +2031,6 @@ def save_masks(images, masks, flows, file_names, png=True, tif=False):
         outlines = outlines_list(masks)
         outlines_to_text(base, outlines)
 
-def save_server(parent=None, filename=None):
-    """ Uploads a *_seg.npy file to the bucket.
-    
-    Parameters
-    ----------------
-
-    parent: PyQt.MainWindow (optional, default None)
-        GUI window to grab file info from
-
-    filename: str (optional, default None)
-        if no GUI, send this file to server
-
-    """
-    if parent is not None:
-        q = QtGui.QMessageBox.question(
-                                    parent,
-                                    "Send to server",
-                                    "Are you sure? Only send complete and fully manually segmented data.\n (do not send partially automated segmentations)",
-                                    QtGui.QMessageBox.Yes | QtGui.QMessageBox.No
-                                  )
-        if q != QtGui.QMessageBox.Yes:
-            return
-        else:
-            filename = parent.filename
-
-    if filename is not None:
-        os.environ['GOOGLE_APPLICATION_CREDENTIALS'] = os.path.join(os.path.dirname(os.path.realpath(__file__)),
-                                                        'key/cellpose-data-writer.json')
-        bucket_name = 'cellpose_data'
-        base = os.path.splitext(filename)[0]
-        source_file_name = base + '_seg.npy'
-        print(source_file_name)
-        time = datetime.datetime.now().strftime("%Y_%m_%d_%H_%M_%S.%f")
-        filestring = time + '.npy'
-        print(filestring)
-        destination_blob_name = filestring
-        storage_client = storage.Client()
-        bucket = storage_client.bucket(bucket_name)
-        blob = bucket.blob(destination_blob_name)
-
-        blob.upload_from_filename(source_file_name)
-
-        print(
-            "File {} uploaded to {}.".format(
-                source_file_name, destination_blob_name
-            )
-        )
-
-def _load_image(parent, filename=None):
-    """ load image with filename; if None, open QFileDialog """
-    if filename is None:
-        name = QtGui.QFileDialog.getOpenFileName(
-            parent, "Load image"
-            )
-        filename = name[0]
-    manual_file = os.path.splitext(filename)[0]+'_seg.npy'
-    if os.path.isfile(manual_file):
-        print(manual_file)
-        _load_seg(parent, manual_file, image=imread(filename), image_file=filename)
-        return
-    elif os.path.isfile(os.path.splitext(filename)[0]+'_manual.npy'):
-        manual_file = os.path.splitext(filename)[0]+'_manual.npy'
-        _load_seg(parent, manual_file, image=imread(filename), image_file=filename)
-        return
-    try:
-        image = imread(filename)
-        image.shape
-        parent.loaded = True
-    except:
-        print('images not compatible')
-
-    if parent.loaded:
-        parent.reset()
-        parent.filename = filename
-        print(filename)
-        filename = os.path.split(parent.filename)[-1]
-        _initialize_images(parent, image, resize=parent.resize, X2=0)
-        parent.clear_all()
-        parent.loaded = True
-        parent.enable_buttons()
-        parent.threshslider.setEnabled(False)
-        parent.probslider.setEnabled(False)
             
 
 def _initialize_images(parent, image, resize, X2):
@@ -2199,11 +2109,6 @@ def _initialize_images(parent, image, resize, X2):
 
 def _load_seg(parent, filename=None, image=None, image_file=None):
     """ load *_seg.npy with filename; if None, open QFileDialog """
-    if filename is None:
-        name = QtGui.QFileDialog.getOpenFileName(
-            parent, "Load labelled data", filter="*.npy"
-            )
-        filename = name[0]
     try:
         dat = np.load(filename, allow_pickle=True).item()
         dat['outlines']
@@ -2344,11 +2249,6 @@ def _load_seg(parent, filename=None, image=None, image_file=None):
 
 def _load_masks(parent, filename=None):
     """ load zeros-based masks (0=no cell, 1=cell 1, ...) """
-    if filename is None:
-        name = QtGui.QFileDialog.getOpenFileName(
-            parent, "Load masks (PNG or TIFF)"
-            )
-        filename = name[0]
     masks = imread(filename)
     outlines = None
     if masks.ndim>3:
@@ -4785,6 +4685,9 @@ def resize_image(img0, Ly=None, Lx=None, rsz=None, interpolation=cv2.INTER_LINEA
         Ly = int(img0.shape[-3] * rsz[-2])
         Lx = int(img0.shape[-2] * rsz[-1])
     
+    Lx = int(round(Lx))
+    Ly = int(round(Ly))
+
     if img0.ndim==4:
         imgs = np.zeros((img0.shape[0], Ly, Lx, img0.shape[-1]), np.float32)
         for i,img in enumerate(img0):
@@ -5382,5 +5285,5 @@ def fill_holes_and_remove_small_masks(masks, min_size=15):
 # ==============================================================================================================================
 
 
-def PyInit_cellposeCompiled():
+def PyInit_Compiled():
     pass

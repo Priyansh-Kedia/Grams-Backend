@@ -1,8 +1,44 @@
 # =============================================== dynamics.py ==============================================
 
 import numpy as np
-from numba import njit, float32, int32, vectorize
+from numba import njit, float32, int32, vectorize, jit, prange
 
+
+@jit(nopython=True, cache=True)
+def outlineCorrectionPass(EdgeImage, outline, ptPriority, priorityMatrix):
+    # maximum neighbour distance considered
+    max_nb_dist = priorityMatrix.shape[0] // 2
+
+    # Running loop for each point in outline
+    for i in prange(outline.shape[0]):
+        # Taking the point
+        pt = outline[i]
+
+        # Getting the priority of the points in the edge image for the neighbours to the current point
+        pt_nb = EdgeImage[pt[1] - max_nb_dist : pt[1] + max_nb_dist + 1, 
+                          pt[0] - max_nb_dist : pt[0] + max_nb_dist + 1].copy()
+        pt_nb_pri = pt_nb * priorityMatrix
+
+        # Getting the maximum neighbour priority value and checking if high
+        maxVal = np.max(pt_nb_pri)
+        if maxVal <= ptPriority[i]:
+            continue
+
+        # Getting the relative position of the highest priority neighbour
+        pos = np.where(pt_nb_pri==maxVal)
+        nb_rel_pos_x = pos[1][0] - max_nb_dist
+        nb_rel_pos_y = pos[0][0] - max_nb_dist
+
+        # Updating the outline to this neighbour
+        outline[i][0] = pt[0] + nb_rel_pos_x
+        outline[i][1] = pt[1] + nb_rel_pos_y
+        # Removing this new point from the edge image 
+        EdgeImage[outline[i][1]][outline[i][0]] = 0
+        # Updating the point priority
+        ptPriority[i] = maxVal
+
+    return outline, ptPriority
+#####################################################################################################################
 
 @njit('(float64[:], int32[:], int32[:], int32, int32, int32, int32)', nogil=True)
 def _extend_centers(T,y,x,ymed,xmed,Lx, niter):
