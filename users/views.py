@@ -1,3 +1,4 @@
+from grams_backend.enums import TrialResponse
 from re import T
 import re
 from django.shortcuts import render
@@ -12,20 +13,23 @@ from . import utils
 from .serializers import OTPSerializer,AddressSerializer,ProfileSerializer, ImageSerializer
 from process_grains.serializers import ScanSerializer
 from main import main
-from .models import Profile, Address, Image
+from .models import Feedback, Profile, Address, Image
 from process_grains.models import Scan
 from grams_backend import Constants
 from rest_framework.decorators import parser_classes
 from rest_framework.views import APIView
 from rest_framework.parsers import MultiPartParser, FormParser
 from mock import mock
-from datetime import datetime, timedelta
-from trials.models import FreeTrial,Paid, Plan
+from datetime import date, datetime, timedelta
 import requests
 from urllib.parse import unquote
 from .tasks import run_ml_code
-from grams_backend.celery import basic,prompt_payment_renewal
-from trials.serializers import PlanSerializer
+from trials.serializers import PlanSerializer,CurrentStatusSerializer
+from trials.models import CurrentStatus
+
+import users
+
+from users import models
 
 
 # OTP #
@@ -49,30 +53,9 @@ def generate_otp(request):
             data = {Constants.MESSAGE:message, Constants.PROFILE:model_to_dict(user_profile), Constants.IS_VERIFIED:False}
             return Response(data, status = status.HTTP_200_OK) 
         url = Constants.OTP_URL+ Constants.OTP_KEY+ "SMS/" + phone_number + "/" + str(otp)
+        print(url)
         requests.post( url )
         if user_profile:
-            
-            try:
-                free_trial = FreeTrial.objects.get(user = user_profile)
-                if free_trial.first_trial and free_trial.second_trial:
-                    try:
-                        paid = Paid.objects.get(user = user_profile)
-                        if paid.paid:
-                            print('ok free to use')
-                        else:
-                            print('please refresh payment')
-                    except:
-                        paid = Paid.objects.create(user = user_profile) 
-                        print('please pay')        
-                elif free_trial.first_trial:
-                    print('add gst details to proceed')
-            except:
-                free_trial = FreeTrial.objects.create(user = user_profile)
-                free_trial.end_date = free_trial.start_date + timedelta(days=free_trial.t1)
-                free_trial.save()
-                print('new trial started')
-                print(free_trial.end_date)
-                basic.apply_async(args = [phone_number],countdown =  free_trial.t1*86400)
             user_profile.otp = otp
             user_profile.save()          
             message = Constants.GRAMS_MESSAGE+" {otp} \n {hash}".format(otp = otp, hash = hashValue)
@@ -116,12 +99,21 @@ def update_profile(request):
         if not profile_serializer.is_valid():
             return Response({Constants.MESSAGE:profile_serializer.errors}, status = status.HTTP_422_UNPROCESSABLE_ENTITY)
         updated_profile = profile_serializer.update(instance = Profile.objects.get(profile_id = profile_id))
+        print(updated_profile.name)
+        current = CurrentStatus.objects.get(user = updated_profile)
+        if updated_profile.gst_no and current.name == TrialResponse.TRIAL1:
+            current.name = TrialResponse.TRIAL2
+            current.end_date = current.end_date + timedelta(Constants.FREETRIAL2_DAYS)
+            current.no_of_readings += Constants.FREETRIAL2_READINGS
+            current.save()
+        print(current.name)
         return Response(model_to_dict(updated_profile), status = status.HTTP_200_OK)
 
 @api_view(['GET',])
 def retrieve_profile(request):
     if request.method == "GET":
-        phone_number = request.GET.get(Constants.PHONE_NUMBER, None)
+        phone_number = request.GET['phone_number']
+        print(phone_number)
         try:
             profile_obj = Profile.objects.get(phone_number = phone_number)
         except Profile.DoesNotExist:
@@ -173,15 +165,33 @@ def health(request):
 def upload_image(request, phone_number):
     if request.method == 'POST':
         profile = Profile.objects.get(phone_number = phone_number)
-        image_obj = Image.objects.create(image = 'onion1.jpg')
+        image_obj = Image.objects.create(image = request.FILES['image'])
         print(image_obj.image.url)
-        run_ml_code.delay(phone_number)
+        run_ml_code.delay(phone_number,image_obj.image.url)
         heading_msg = "Your results will be available soon"
         content_msg = "Your results will come soon"
         data = {"app_id": Constants.APP_ID, "contents": {"en": content_msg}, "headings": {"en": heading_msg}, "include_external_user_ids": [phone_number] , "chrome_web_image": Constants.CHROME_WEB_IMAGE}
         requests.post(Constants.API_URL,headers={"Authorization": "Basic "+Constants.API_KEY}, json=data)
+        current = CurrentStatus.objects.get(user = profile)
+        current.no_of_readings -= 1
+        current.save()
+        current_serializer = CurrentStatusSerializer(current)
+        return Response(current_serializer.data, status = status.HTTP_200_OK)
+
+@api_view(['POST'])
+def feedback(request):
+    if request.method == "POST":
+        feedback = request.POST.get(Constants.FEEDBACK)
+        profile_id = request.POST.get(Constants.PROFILE_ID)
+        try:
+            profile_obj = Profile.objects.get(profile_id = profile_id)
+        except:
+            return Response({Constants.MESSAGE:'Profile does not exist'}, status = status.HTTP_404_NOT_FOUND)
+        feedback_obj = Feedback.objects.create(feedback = feedback, user = profile_obj)
+        feedback_obj = model_to_dict(feedback_obj)
         data = {
-            'data': 'hello',
+            Constants.MESSAGE: "Feedback received successfully",
+            Constants.FEEDBACK : feedback_obj, 
         }
         return Response(data, status = status.HTTP_200_OK)
 

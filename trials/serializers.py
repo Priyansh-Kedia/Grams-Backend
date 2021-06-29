@@ -1,5 +1,6 @@
-from rest_framework import serializers
-from .models import Plan,Paid
+from rest_framework import response, serializers
+from .models import Plan,CurrentStatus
+from users.serializers import ProfileSerializer
 
 class PlanSerializer(serializers.ModelSerializer):
 
@@ -7,9 +8,14 @@ class PlanSerializer(serializers.ModelSerializer):
         model = Plan
         fields = '__all__'
 
-
-class PaidSerializer(serializers.ModelSerializer):
+class CurrentStatusSerializer(serializers.ModelSerializer):
 
     class Meta:
-        model = Paid
-        fields = '__all__'        
+        model = CurrentStatus
+        fields = '__all__'
+
+    def to_representation(self, instance):
+        response =  super().to_representation(instance)
+        response['user'] = ProfileSerializer(instance.user).data
+        response['plan'] = PlanSerializer(instance.plan).data
+        return response

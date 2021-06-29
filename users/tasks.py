@@ -14,8 +14,8 @@ def add(x, y):
 
 
 @shared_task
-def run_ml_code(phone_number):
-    ml_list, _ = main('onion1.jpg',20,0.25)
+def run_ml_code(phone_number,image_url):
+    ml_list, _ = main(image_url,20,0.25)
         # ml_data =  {
         # 'item_type' : "hello",
         # 'sub_type' : "hello",
