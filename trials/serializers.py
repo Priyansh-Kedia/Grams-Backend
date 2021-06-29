@@ -7,6 +7,7 @@ class PlanSerializer(serializers.ModelSerializer):
     class Meta:
         model = Plan
         fields = '__all__'
+        ordering = ['no_of_days']
 
 class CurrentStatusSerializer(serializers.ModelSerializer):
 

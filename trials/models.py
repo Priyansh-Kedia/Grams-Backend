@@ -12,6 +12,9 @@ class Plan(models.Model):
     no_of_days = models.IntegerField(default=30)
     discount = models.IntegerField(null=True,blank=True,default=0)
 
+    class Meta:
+        ordering = ['no_of_days']
+    
     def __str__(self):
         return self.name
 
