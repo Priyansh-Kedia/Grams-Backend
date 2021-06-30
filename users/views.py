@@ -175,7 +175,7 @@ def upload_image(request):
     if request.method == 'POST':
         phone_number = request.POST['phone_number']
         profile = Profile.objects.get(phone_number = phone_number)
-        image_obj = Image.objects.create(image = request.FILES['image'])
+        image_obj = Image.objects.create(image = request.data['image'])
         item_type = request.POST['type']
         sub_type = request.POST['sub_type']
         print(image_obj.image.url)
