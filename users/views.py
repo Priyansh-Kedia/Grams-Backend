@@ -126,6 +126,7 @@ def retrieve_profile(request):
 @api_view(['POST',])
 def add_address(request):
     if request.method == "POST":
+        print(request.data)
         pk = request.POST['profile_id']
         add_obj = Address.objects.create(profile_id=pk)
         add_obj.address_id = request.POST['address_id']
