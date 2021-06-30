@@ -36,7 +36,7 @@ def run_ml_code(phone_number,image_url,item_type,sub_type):
         'lot_no' : "hello",
         'no_of_kernels' : ml_list[0],
         }
-        ml_data['user'] = profile.pk
+        ml_data['user'] = profile.profile_id
         print(ml_data)
         scan_serializer = ScanSerializer(data = ml_data)
         if not scan_serializer.is_valid():
