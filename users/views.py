@@ -128,12 +128,13 @@ def add_address(request):
     if request.method == "POST":
         print(request.data)
         pk = request.POST['profile_id']
-        add_obj = Address.objects.create(profile_id=pk)
-        add_obj.address_id = request.POST['address_id']
-        add_obj.address = request.POST['address']
-        add_obj.city = request.POST['city']
-        add_obj.state = request.POST['state']
-        add_obj.country = request.POST['country']
+        profile = Profile.objects.get(pk = pk)
+        add_obj = Address.objects.create(profile_id=profile)
+        add_obj.address_id = request.data['address_id']
+        add_obj.address = request.data['address']
+        add_obj.city = request.data['city']
+        add_obj.state = request.data['state']
+        add_obj.country = request.data['country']
         add_obj.save()
         print(add_obj)
         address_serializer = AddressSerializer(data = request.data)
