@@ -127,7 +127,7 @@ def retrieve_profile(request):
 def add_address(request):
     if request.method == "POST":
         print(request.data)
-        pk = request.POST['profile_id']
+        pk = request.data['profile_id']
         profile = Profile.objects.get(pk = pk)
         add_obj = Address.objects.create(profile_id=profile)
         add_obj.address_id = request.data['address_id']
