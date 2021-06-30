@@ -79,6 +79,7 @@ class ProfileSerializer(serializers.ModelSerializer):
         instance.name = self.first_letter_capitalized_form((self.validated_data['name'],instance.name)[self.validated_data.get('name') is None])
         instance.designation = self.first_letter_capitalized_form((self.validated_data['designation'],instance.designation)[self.validated_data.get('designation') is None])
         instance.email_id = self.lowercase_form((self.validated_data['email_id'],instance.email_id)[self.validated_data.get('email_id') is None])
+        instance.gst_no = (self.validated_data['gst_no'],instance.gst_no)[self.validated_data.get('gst_no') is None]
         instance.is_agreed = self.validated_data.get('is_agreed', instance.is_agreed)
         instance.save()
         return instance

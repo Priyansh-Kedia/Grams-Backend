@@ -126,7 +126,7 @@ def retrieve_profile(request):
 @api_view(['POST',])
 def add_address(request):
     if request.method == "POST":
-        pk = request.POST['pk']
+        pk = request.POST['profile_id']
         add_obj = Address.objects.create(profile_id=pk)
         add_obj.address_id = request.POST['address_id']
         add_obj.address = request.POST['address']
@@ -169,8 +169,9 @@ def health(request):
 
 @api_view(['POST',])
 @parser_classes([MultiPartParser, FormParser])
-def upload_image(request, phone_number):
+def upload_image(request):
     if request.method == 'POST':
+        phone_number = request.POST['phone_number']
         profile = Profile.objects.get(phone_number = phone_number)
         image_obj = Image.objects.create(image = request.FILES['image'])
         item_type = request.POST['type']
