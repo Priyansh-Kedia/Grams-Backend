@@ -171,13 +171,14 @@ def health(request):
 
 @api_view(['POST',])
 @parser_classes([MultiPartParser, FormParser])
-def upload_image(request):
+def upload_image(request, phone_number, type, sub_type):
     if request.method == 'POST':
-        phone_number = request.POST['phone_number']
+        # phone_number = request.POST['phone_number']
         profile = Profile.objects.get(phone_number = phone_number)
         image_obj = Image.objects.create(image = request.data['image'])
-        item_type = request.POST['type']
-        sub_type = request.POST['sub_type']
+        # item_type = request.POST['type']
+        # sub_type = request.POST['sub_type']
+        item_type = type
         print(image_obj.image.url)
         run_ml_code.delay(phone_number,image_obj.image.url,item_type,sub_type)
         # heading_msg = "Your results will be available soon"
