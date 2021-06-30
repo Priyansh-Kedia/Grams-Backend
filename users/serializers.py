@@ -56,7 +56,7 @@ class ProfileSerializer(serializers.ModelSerializer):
     
     class Meta:
         model = Profile
-        fields = [ 'name', 'company_name', 'email_id', 'is_agreed', 'phone_number', 'designation']
+        fields = [ 'name', 'company_name', 'email_id', 'is_agreed', 'phone_number', 'designation','gst_no']
         extra_kwargs = {
             'profile_id': {'read_only': True}
         }

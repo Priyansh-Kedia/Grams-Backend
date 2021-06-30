@@ -126,8 +126,9 @@ def retrieve_profile(request):
 @api_view(['POST',])
 def add_address(request):
     if request.method == "POST":
-        add_obj = Address(profile_id=Profile.objects.get(pk=1), address= 'TESTING')
-        print(add_obj.address)
+        pk = request.POST['pk']
+        print(request.data)
+        add_obj = Address.objects.create(profile_id = pk)
         add_obj.save()
         address_serializer = AddressSerializer(data = request.data)
         if not address_serializer.is_valid():
@@ -162,8 +163,9 @@ def health(request):
 
 @api_view(['POST',])
 @parser_classes([MultiPartParser, FormParser])
-def upload_image(request, phone_number):
+def upload_image(request):
     if request.method == 'POST':
+        phone_number = request.POST['phone_number']
         profile = Profile.objects.get(phone_number = phone_number)
         image_obj = Image.objects.create(image = request.FILES['image'])
         item_type = request.POST['type']
