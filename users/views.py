@@ -126,9 +126,15 @@ def retrieve_profile(request):
 @api_view(['POST',])
 def add_address(request):
     if request.method == "POST":
-        add_obj = Address(profile_id=Profile.objects.get(pk=1), address= 'TESTING')
-        print(add_obj.address)
+        pk = request.POST['pk']
+        add_obj = Address.objects.create(profile_id=pk)
+        add_obj.address_id = request.POST['address_id']
+        add_obj.address = request.POST['address']
+        add_obj.city = request.POST['city']
+        add_obj.state = request.POST['state']
+        add_obj.country = request.POST['country']
         add_obj.save()
+        print(add_obj)
         address_serializer = AddressSerializer(data = request.data)
         if not address_serializer.is_valid():
             return Response(address_serializer.errors, status = status.HTTP_422_UNPROCESSABLE_ENTITY)
