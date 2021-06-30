@@ -20,6 +20,7 @@ def add(x, y):
 @shared_task
 def run_ml_code(phone_number,image_url,item_type,sub_type):
     profile = Profile.objects.get(phone_number=phone_number)
+    print(profile)
     image_url = os.getcwd() + image_url
     try:
         ml_list, _ = main(image_url)
