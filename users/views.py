@@ -179,7 +179,7 @@ def upload_image(request, phone_number, type, sub_type):
         # item_type = request.POST['type']
         # sub_type = request.POST['sub_type']
         item_type = type
-        print(image_obj.image.url)
+        print(image_obj.image.url, phone_number)
         run_ml_code.delay(phone_number,image_obj.image.url,item_type,sub_type)
         # heading_msg = "Your results will be available soon"
         # content_msg = "Your results will come soon"
