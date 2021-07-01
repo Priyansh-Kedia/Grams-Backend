@@ -157,8 +157,9 @@ def update_address(request):
 def retrieve_address(request):
     if request.method == "GET":
         profile_id = request.GET.get(Constants.PROFILE_ID, None)
-        retrieved_addresses = Profile.getAllAddresses(profile_id)
-        retrieved_address_serializer = AddressSerializer(retrieved_addresses, many = True)
+        profile = Profile.objects.get(pk = profile_id)
+        retrieved_addresses = Address.objects.get_or_create(profile_id = profile)
+        retrieved_address_serializer = AddressSerializer(retrieved_addresses)
         return Response(retrieved_address_serializer.data, status = status.HTTP_200_OK)
 
 
