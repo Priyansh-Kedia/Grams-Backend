@@ -26,6 +26,7 @@ from urllib.parse import unquote
 from .tasks import run_ml_code
 from trials.serializers import PlanSerializer,CurrentStatusSerializer
 from trials.models import CurrentStatus
+from decouple import config
 
 import users
 
@@ -52,7 +53,7 @@ def generate_otp(request):
             message = Constants.GRAMS_MESSAGE+" {otp} \n {hash}".format(otp = otp, hash = hashValue)
             data = {Constants.MESSAGE:message, Constants.PROFILE:model_to_dict(user_profile), Constants.IS_VERIFIED:False}
             return Response(data, status = status.HTTP_200_OK) 
-        url = Constants.OTP_URL+ Constants.OTP_KEY+ "SMS/" + phone_number + "/" + str(otp)
+        url = Constants.OTP_URL+ config(OTP_KEY)+ "SMS/" + phone_number + "/" + str(otp)
         print(url)
         requests.post( url )
         if user_profile:
