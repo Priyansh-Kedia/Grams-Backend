@@ -1,11 +1,18 @@
-import cv2
-import math
-import argparse
-import numpy as np
-from matplotlib import pyplot as p
+try:
+    import os
+    import cv2
+    import math
+    import argparse
+    import numpy as np
+    from matplotlib import pyplot as p
+except:
+    raise ValueError("Libraries not installed.")
 
-import ArucoBox
-import poseSegmentation
+try:
+    import ArucoBox
+    import poseSegmentation
+except:
+    raise ValueError("Other files not found.")
 
 
 def ArgParse():
@@ -87,8 +94,7 @@ def TransformExtractBox_GetMap(Image, OriDistBetArucoCorners=(23.47, 17.26)):
     # Getting aruco box points
     BoxCorners = ArucoBox.GetBox(Image, NumOfMarkers=4)
     if BoxCorners is None:
-        print("\nAll markers not found properly.\nRetake the image.\n")
-        return -1
+        raise ValueError("All markers not found properly. Retake the image.")
 
     # Transforming image
     Image = TransformBox(Image, BoxCorners.copy())
@@ -170,7 +176,11 @@ def getData(Contours, Mapping):
     for i in range(len(Contours)):
         Contour_Dict[str(i)] = FindParams(Contours[i], Mapping)
     
-    from pandas import DataFrame, Series
+    try:
+        from pandas import DataFrame, Series
+    except:
+        raise ValueError("Pandas not found.")
+
     df = DataFrame(dict([ (k,Series(v)) for k,v in Contour_Dict.items() ]))
     df = df.T
     df.to_csv("Grain_AppData.csv", header=False, index=False) 
@@ -181,8 +191,16 @@ def getData(Contours, Mapping):
 
 
 def main(ImagePath):
+    # Checking image path
+    if ImagePath is None or not os.path.exists(ImagePath):
+        raise ValueError("Image path is not correct.")
+
     # Reading image
     Image = cv2.imread(ImagePath)
+
+    # Checking image
+    if Image is None:
+        raise ValueError("Image not read.")
 
     # Transform and extract box
     Image, PixelMapping = TransformExtractBox_GetMap(Image)
@@ -193,6 +211,10 @@ def main(ImagePath):
     # Applying cellpose segmentation
     Outlines = poseSegmentation.ApplyCellpose(Image, DownscaleFactor=DownscaleFactor, UpscaleFactor=UpscaleFactor, 
                                               SaveOutlines=True, ShowContoursImage=False, CorrectOutlinesFlag=True)
+
+    # Checking if any outline found
+    if Outlines is None or len(Outlines) == 0:
+        return [0.0] * 6, Image.copy()
 
     # Numbering grains
     NumberedImage = NumberGrain(Image, Outlines)
