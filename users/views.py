@@ -38,7 +38,8 @@ from users import models
 def generate_otp(request):
     if request.method == "POST":
         hashValue = request.POST.get(Constants.HASH)
-        phone_number = request.POST.get(Constants.PHONE_NUMBER)         
+        phone_number = request.POST.get(Constants.PHONE_NUMBER)    
+        print(phone_number)     
         otp = utils.otp_generator()
         serializer = OTPSerializer(data = request.data)
         if not serializer.is_valid():
@@ -53,7 +54,7 @@ def generate_otp(request):
             message = Constants.GRAMS_MESSAGE+" {otp} \n {hash}".format(otp = otp, hash = hashValue)
             data = {Constants.MESSAGE:message, Constants.PROFILE:model_to_dict(user_profile), Constants.IS_VERIFIED:False}
             return Response(data, status = status.HTTP_200_OK) 
-        url = Constants.OTP_URL+ config(OTP_KEY)+ "SMS/" + phone_number + "/" + str(otp)
+        url = Constants.OTP_URL+ config("OTP_KEY")+ "SMS/" + phone_number + "/" + str(otp)
         print(url)
         requests.post( url )
         if user_profile:
