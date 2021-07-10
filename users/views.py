@@ -114,7 +114,9 @@ def update_profile(request):
             current.no_of_readings += Constants.FREETRIAL2_READINGS
             current.save()
         print(current.name)
-        return Response(model_to_dict(updated_profile), status = status.HTTP_200_OK)
+        profile_dict = model_to_dict(updated_profile)
+        profile_dict["current_status_name"] = current.name
+        return Response(profile_dict, status = status.HTTP_200_OK)
 
 @api_view(['GET',])
 def retrieve_profile(request):
