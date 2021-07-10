@@ -18,11 +18,11 @@ def add(x, y):
     profiles.delete()
     return x+y
 
-
 @shared_task
 def run_ml_code(phone_number,image_url,item_type,sub_type):
+    print("got it")
+    print("pjone", phone_number)
     profile = Profile.objects.get(phone_number=phone_number)
-    print(image_url)
     image_url = os.getcwd() + image_url
     try:
         ml_list, _ = main(image_url)
@@ -49,7 +49,7 @@ def run_ml_code(phone_number,image_url,item_type,sub_type):
         content_msg = "Your Reading has been successfully computed."
         data = { "app_id": config(Constants.APP_ID), "contents": {"en": content_msg}, "headings": {"en": heading_msg}, "include_external_user_ids": [phone_number] , "chrome_web_image": config(Constants.CHROME_WEB_IMAGE)}
 
-        requests.post(    "https://onesignal.com/api/v1/notifications",    headers={"Authorization": "Basic" +  config(Constants.API_KEY)}, json=data)
+        requests.post(    "https://onesignal.com/api/v1/notifications",    headers={"Authorization": "Basic " +  config(Constants.API_KEY)}, json=data)
         print(ml_list)
     except Exception as e:
         current = CurrentStatus.objects.get(user = profile)
@@ -57,7 +57,15 @@ def run_ml_code(phone_number,image_url,item_type,sub_type):
         current.save()
         print(current.no_of_readings)
         heading_msg = "Your results are unable to be computed"
-        content_msg = e
-        # data = { "app_id": "fad6e42a-0b02-45d6-9ab0-a654b204aca9", "contents": {"en": content_msg}, "headings": {"en": heading_msg}, "include_external_user_ids": [phone_number] , "chrome_web_image": "https://images.ctfassets.net/hrltx12pl8hq/7yQR5uJhwEkRfjwMFJ7bUK/dc52a0913e8ff8b5c276177890eb0129/offset_comp_772626-opt.jpg?fit=fill&w=800&h=300"}
-        # requests.post("https://onesignal.com/api/v1/notifications",headers={"Authorization": "Basic NDJkOGMyZDQtMjgyYi00Y2JkLWFjZTgtZGQ2NjQ1NDUwNzg3"}, json=data)
+        content_msg = str(e)
+        print(phone_number, config(Constants.APP_ID))
+        data = {
+            "app_id": config(Constants.APP_ID), 
+            "contents": {"en": content_msg}, 
+            "headings": {"en": heading_msg}, 
+            "include_external_user_ids": [phone_number] , 
+            "chrome_web_image": config(Constants.CHROME_WEB_IMAGE)
+        }
+        print("api key", data)
+        requests.post("https://onesignal.com/api/v1/notifications",headers={"Authorization": "Basic " +  config(Constants.API_KEY)}, json=data)
         print(e)

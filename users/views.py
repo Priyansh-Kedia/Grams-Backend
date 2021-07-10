@@ -23,7 +23,7 @@ from mock import mock
 from datetime import date, datetime, timedelta
 import requests
 from urllib.parse import unquote
-from .tasks import run_ml_code
+from .tasks import add, run_ml_code
 from trials.serializers import PlanSerializer,CurrentStatusSerializer
 from trials.models import CurrentStatus
 from decouple import config
@@ -115,6 +115,7 @@ def update_profile(request):
             current.save()
         print(current.name)
         profile_dict = model_to_dict(updated_profile)
+        profile_dict["end_date"] = current.end_date
         profile_dict["current_status_name"] = current.name
         return Response(profile_dict, status = status.HTTP_200_OK)
 
@@ -135,22 +136,11 @@ def retrieve_profile(request):
 @api_view(['POST',])
 def add_address(request):
     if request.method == "POST":
-        print(request.data)
-        pk = request.data['profile_id']
-        profile = Profile.objects.get(pk = pk)
-        add_obj = Address.objects.create(profile_id=profile)
-        add_obj.address_id = request.data['address_id']
-        add_obj.address = request.data['address']
-        add_obj.city = request.data['city']
-        add_obj.state = request.data['state']
-        add_obj.country = request.data['country']
-        add_obj.save()
-        print(add_obj)
         address_serializer = AddressSerializer(data = request.data)
         if not address_serializer.is_valid():
             return Response(address_serializer.errors, status = status.HTTP_422_UNPROCESSABLE_ENTITY)
-        updated_address_obj = address_serializer.create()
-        return Response(model_to_dict(updated_address_obj), status = status.HTTP_200_OK)
+        address_serializer.create()
+        return Response(address_serializer.data, status = status.HTTP_200_OK)
 
 @api_view(['PUT',])
 def update_address(request):
@@ -167,9 +157,13 @@ def retrieve_address(request):
     if request.method == "GET":
         profile_id = request.GET.get(Constants.PROFILE_ID, None)
         profile = Profile.objects.get(pk = profile_id)
-        retrieved_addresses = Address.objects.get_or_create(profile_id = profile)
-        retrieved_address_serializer = AddressSerializer(retrieved_addresses)
-        return Response(retrieved_address_serializer.data, status = status.HTTP_200_OK)
+        try:
+            retrieved_addresses = Address.objects.get(profile_id = profile)
+            retrieved_address_serializer = AddressSerializer(retrieved_addresses)
+            print(retrieved_address_serializer.data)
+            return Response(retrieved_address_serializer.data, status = status.HTTP_200_OK)
+        except Address.DoesNotExist:
+            return Response({Constants.MESSAGE: "Does not exist"}, status= status.HTTP_400_BAD_REQUEST)
 
 
         
