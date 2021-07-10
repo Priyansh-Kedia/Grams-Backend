@@ -142,8 +142,9 @@ def add_address(request):
         address_serializer = AddressSerializer(data = request.data)
         if not address_serializer.is_valid():
             return Response(address_serializer.errors, status = status.HTTP_422_UNPROCESSABLE_ENTITY)
-        address_serializer.create()
-        return Response(address_serializer.data, status = status.HTTP_200_OK)
+        address = address_serializer.create()
+        print(model_to_dict(address))
+        return Response(model_to_dict(address), status = status.HTTP_200_OK)
 
 @api_view(['PUT',])
 def update_address(request):
