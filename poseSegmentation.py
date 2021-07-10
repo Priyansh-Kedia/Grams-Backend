@@ -6,11 +6,10 @@ import numpy as np
 import process_outlines as po 
 
 # Importing cellpose and installing dependencies if required
-# try:
-#     import Compiled as cc
-# except:
-#     print("\nInstall cellpose dependencies first.")
-#     exit()
+try:
+    import Compiled as cc
+except:
+    raise ValueError("Install cellpose dependencies first.")
 
 
 # Parsing the arguments
@@ -74,6 +73,9 @@ def ApplyCellpose(Image, DownscaleFactor=0.25, UpscaleFactor=4, SaveOutlines=Tru
     outlinesStart = t.time()
     outlines = po.outlines_list_Fast(masks, DownscaleFactor, UpscaleFactor)
     print("Time Taken for calculating outlines: {}".format(t.time() - outlinesStart))
+
+    if outlines is None or len(outlines) == 0:
+        return []
 
     # Correcting outlines
     if CorrectOutlinesFlag:
