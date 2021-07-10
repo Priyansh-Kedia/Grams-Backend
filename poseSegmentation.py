@@ -6,11 +6,11 @@ import numpy as np
 import process_outlines as po 
 
 # Importing cellpose and installing dependencies if required
-try:
-    import Compiled as cc
-except:
-    print("\nInstall cellpose dependencies first.")
-    exit()
+# try:
+#     import Compiled as cc
+# except:
+#     print("\nInstall cellpose dependencies first.")
+#     exit()
 
 
 # Parsing the arguments

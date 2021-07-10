@@ -26,6 +26,7 @@ from urllib.parse import unquote
 from .tasks import run_ml_code
 from trials.serializers import PlanSerializer,CurrentStatusSerializer
 from trials.models import CurrentStatus
+from decouple import config
 
 import users
 
@@ -52,7 +53,7 @@ def generate_otp(request):
             message = Constants.GRAMS_MESSAGE+" {otp} \n {hash}".format(otp = otp, hash = hashValue)
             data = {Constants.MESSAGE:message, Constants.PROFILE:model_to_dict(user_profile), Constants.IS_VERIFIED:False}
             return Response(data, status = status.HTTP_200_OK) 
-        url = Constants.OTP_URL+ Constants.OTP_KEY+ "SMS/" + phone_number + "/" + str(otp)
+        url = Constants.OTP_URL+ config(OTP_KEY)+ "SMS/" + phone_number + "/" + str(otp)
         print(url)
         requests.post( url )
         if user_profile:
@@ -126,9 +127,17 @@ def retrieve_profile(request):
 @api_view(['POST',])
 def add_address(request):
     if request.method == "POST":
-        add_obj = Address(profile_id=Profile.objects.get(pk=1), address= 'TESTING')
-        print(add_obj.address)
+        print(request.data)
+        pk = request.data['profile_id']
+        profile = Profile.objects.get(pk = pk)
+        add_obj = Address.objects.create(profile_id=profile)
+        add_obj.address_id = request.data['address_id']
+        add_obj.address = request.data['address']
+        add_obj.city = request.data['city']
+        add_obj.state = request.data['state']
+        add_obj.country = request.data['country']
         add_obj.save()
+        print(add_obj)
         address_serializer = AddressSerializer(data = request.data)
         if not address_serializer.is_valid():
             return Response(address_serializer.errors, status = status.HTTP_422_UNPROCESSABLE_ENTITY)
@@ -138,6 +147,7 @@ def add_address(request):
 @api_view(['PUT',])
 def update_address(request):
     if request.method == "PUT":
+        print(request.data)
         address_serializer = AddressSerializer(data = request.data)
         if not address_serializer.is_valid():
             return Response({Constants.MESSAGE:address_serializer.errors}, status = status.HTTP_422_UNPROCESSABLE_ENTITY)
@@ -148,8 +158,9 @@ def update_address(request):
 def retrieve_address(request):
     if request.method == "GET":
         profile_id = request.GET.get(Constants.PROFILE_ID, None)
-        retrieved_addresses = Profile.getAllAddresses(profile_id)
-        retrieved_address_serializer = AddressSerializer(retrieved_addresses, many = True)
+        profile = Profile.objects.get(pk = profile_id)
+        retrieved_addresses = Address.objects.get_or_create(profile_id = profile)
+        retrieved_address_serializer = AddressSerializer(retrieved_addresses)
         return Response(retrieved_address_serializer.data, status = status.HTTP_200_OK)
 
 
@@ -162,13 +173,15 @@ def health(request):
 
 @api_view(['POST',])
 @parser_classes([MultiPartParser, FormParser])
-def upload_image(request, phone_number):
+def upload_image(request, phone_number, type, sub_type):
     if request.method == 'POST':
+        # phone_number = request.POST['phone_number']
         profile = Profile.objects.get(phone_number = phone_number)
-        image_obj = Image.objects.create(image = request.FILES['image'])
-        item_type = request.POST['type']
-        sub_type = request.POST['sub_type']
-        print(image_obj.image.url)
+        image_obj = Image.objects.create(image = request.data['image'])
+        # item_type = request.POST['type']
+        # sub_type = request.POST['sub_type']
+        item_type = type
+        print(image_obj.image.url, phone_number)
         run_ml_code.delay(phone_number,image_obj.image.url,item_type,sub_type)
         # heading_msg = "Your results will be available soon"
         # content_msg = "Your results will come soon"
