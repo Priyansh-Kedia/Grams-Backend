@@ -65,6 +65,7 @@ python-crontab==2.5.1
 python-dateutil==2.8.1
 pytz==2021.1
 python-decouple==3.4
+psycopg2-binary==2.9.1
 # pywin32==300
 PyYAML==5.3.1
 redis==3.5.3
