@@ -1,4 +1,5 @@
 from __future__ import absolute_import, unicode_literals
+from grams_backend import Constants
 
 from celery import shared_task
 
@@ -46,9 +47,9 @@ def run_ml_code(phone_number,image_url,item_type,sub_type):
         scan_serializer.save()
         heading_msg = "Your results of reading ID is available, View your result in the app"
         content_msg = "Your Reading has been successfully computed."
-        data = { "app_id": config("APP_ID"), "contents": {"en": content_msg}, "headings": {"en": heading_msg}, "include_external_user_ids": [phone_number] , "chrome_web_image": config("CHROME_WEB_IMAGE")}
+        data = { "app_id": config(Constants.APP_ID), "contents": {"en": content_msg}, "headings": {"en": heading_msg}, "include_external_user_ids": [phone_number] , "chrome_web_image": config(Constants.CHROME_WEB_IMAGE)}
 
-        requests.post(    "https://onesignal.com/api/v1/notifications",    headers={"Authorization": "Basic" +  config("API_KEY")}, json=data)
+        requests.post(    "https://onesignal.com/api/v1/notifications",    headers={"Authorization": "Basic" +  config(Constants.API_KEY)}, json=data)
         print(ml_list)
     except Exception as e:
         current = CurrentStatus.objects.get(user = profile)
