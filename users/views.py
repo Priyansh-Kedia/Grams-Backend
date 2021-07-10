@@ -84,7 +84,7 @@ def verify_otp(request):
         if user_profile:
             if otp == str(user_profile.otp) :
                 if (timezone.now() - user_profile.otp_timestamp).seconds < 1800:
-                    current,_ = CurrentStatus.objects.create(user = user_profile)   
+                    current = CurrentStatus.objects.create(user = user_profile)   
                     if not current.name:
                         current.name = TrialResponse.TRIAL1
                         current.end_date = datetime.now()+timedelta(Constants.FREETRIAL1_DAYS)
