@@ -193,7 +193,8 @@ def getData(Contours, Mapping):
     # Storing data in CSV
     df = DataFrame(dict([ (k,Series(v)) for k,v in Contour_Dict.items() ]))
     df = df.T
-    df.to_csv(CSVName, header=False, index=False)
+    path = '/media/outputs/' + CSVName
+    df.to_csv(path, header=False, index=False)
     
     # Getting average values
     Mean = GetAvg(Contour_Dict)
