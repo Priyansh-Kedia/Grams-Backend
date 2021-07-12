@@ -1,3 +1,6 @@
+from datetime import date
+
+
 try:
     import os
     import cv2
@@ -178,16 +181,24 @@ def getData(Contours, Mapping):
     
     try:
         from pandas import DataFrame, Series
+        import datetime
     except:
         raise ValueError("Pandas not found.")
 
+    # Generating CSV Name
+    CSVName = "Grain_AppData.csv"
+    CT = datetime.datetime.now()
+    CSVName = ('_').join([str(CT.year), str(CT.month), str(CT.day), str(CT.hour), str(CT.minute), str(CT.second), str(CT.microsecond), CSVName])
+
+    # Storing data in CSV
     df = DataFrame(dict([ (k,Series(v)) for k,v in Contour_Dict.items() ]))
     df = df.T
-    df.to_csv("Grain_AppData.csv", header=False, index=False) 
+    df.to_csv(CSVName, header=False, index=False)
     
+    # Getting average values
     Mean = GetAvg(Contour_Dict)
     
-    return list([len(Contours)]) + list(Mean)
+    return list([len(Contours)]) + list(Mean), os.path.join(os.getcwd(), CSVName)
 
 
 def main(ImagePath):
@@ -211,7 +222,7 @@ def main(ImagePath):
 
     # Applying cellpose segmentation
     Outlines = poseSegmentation.ApplyCellpose(Image, DownscaleFactor=DownscaleFactor, UpscaleFactor=UpscaleFactor, 
-                                              SaveOutlines=True, ShowContoursImage=False, CorrectOutlinesFlag=True)
+                                              SaveOutlines=False, ShowContoursImage=False, CorrectOutlinesFlag=True)
 
     # Checking if any outline found
     if Outlines is None or len(Outlines) == 0:
@@ -221,12 +232,13 @@ def main(ImagePath):
     NumberedImage = NumberGrain(Image, Outlines)
 
     # Getting grain data
-    GrainData = getData(Outlines, PixelMapping)
+    GrainData, CSVPath = getData(Outlines, PixelMapping)
 
-    return GrainData, NumberedImage
+    return GrainData, NumberedImage, CSVPath
 
 
 if __name__ == "__main__":
     args = ArgParse()
 
-    results, _ = main(args["imgPath"])
+    results, _, CSVPath = main(args["imgPath"])
+    print(CSVPath)

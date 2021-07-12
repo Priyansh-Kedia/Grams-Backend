@@ -123,7 +123,7 @@ media/
 
 # Output csv and image
 /Numbered.jpg
-/ContoursFound.csv
+/*.csv
 
 # Elastic Beanstalk Files
 .elasticbeanstalk/*
