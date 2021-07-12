@@ -191,12 +191,13 @@ def getData(Contours, Mapping):
 
 
 def main(ImagePath):
-    # Checking image path
-    if ImagePath is None or not os.path.exists(ImagePath):
-        raise ValueError("Image path is not correct.")
+    # # Checking image path
+    # if ImagePath is None or not os.path.exists(ImagePath):
+    #     raise ValueError("Image path is not correct.")
 
     # Reading image
-    Image = cv2.imread(ImagePath)
+    Image = cv2.imread("testImage_Mung.jpg")
+    # Image = cv2.imread(ImagePath)
 
     # Checking image
     if Image is None:
