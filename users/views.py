@@ -187,8 +187,7 @@ def upload_image(request, phone_number, type, sub_type):
         # item_type = request.POST['type']
         # sub_type = request.POST['sub_type']
         item_type = type
-        print(image_obj.image.url, phone_number)
-        run_ml_code.delay(phone_number,image_obj.image.url,item_type,sub_type)
+        run_ml_code.delay(phone_number,image_obj.image.url,item_type,sub_type, image_obj.id)
         # heading_msg = "Your results will be available soon"
         # content_msg = "Your results will come soon"
         # data = {"app_id": Constants.APP_ID, "contents": {"en": content_msg}, "headings": {"en": heading_msg}, "include_external_user_ids": [phone_number] , "chrome_web_image": Constants.CHROME_WEB_IMAGE}
