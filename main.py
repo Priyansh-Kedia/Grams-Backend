@@ -202,7 +202,7 @@ def getData(Contours, Mapping):
     # Getting average values
     Mean = GetAvg(Contour_Dict)
     
-    return list([len(Contours)]) + list(Mean), os.path.join(os.getcwd(), CSVPath)
+    return list([len(Contours)]) + list(Mean), CSVName
 
 
 def main(ImagePath):
@@ -236,14 +236,14 @@ def main(ImagePath):
     NumberedImage = NumberGrain(Image, Outlines)
 
     # Getting grain data
-    GrainData, CSVPath = getData(Outlines, PixelMapping)
+    GrainData, CSVName = getData(Outlines, PixelMapping)
 
-    # return GrainData, NumberedImage, CSVPath
-    return CSVPath
+    # return GrainData, NumberedImage, CSVName
+    return CSVName
 
 
 if __name__ == "__main__":
     args = ArgParse()
 
-    results, _, CSVPath = main(args["imgPath"])
-    print(CSVPath)
+    results, _, CSVName = main(args["imgPath"])
+    print(CSVName)
