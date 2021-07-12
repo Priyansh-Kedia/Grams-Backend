@@ -189,17 +189,20 @@ def getData(Contours, Mapping):
     CSVName = "Grain_AppData.csv"
     CT = datetime.datetime.now()
     CSVName = ('_').join([str(CT.year), str(CT.month), str(CT.day), str(CT.hour), str(CT.minute), str(CT.second), str(CT.microsecond), CSVName])
+    DirectoryName = "media/outputs"
+    if not os.path.exists(DirectoryName):
+        os.makedirs(DirectoryName)
+    CSVPath = os.path.join(DirectoryName, CSVName)
 
     # Storing data in CSV
     df = DataFrame(dict([ (k,Series(v)) for k,v in Contour_Dict.items() ]))
     df = df.T
-    path = '/media/outputs/' + CSVName
-    df.to_csv(path, header=False, index=False)
+    df.to_csv(CSVPath, header=False, index=False)
     
     # Getting average values
     Mean = GetAvg(Contour_Dict)
     
-    return list([len(Contours)]) + list(Mean), os.path.join(os.getcwd(), CSVName)
+    return list([len(Contours)]) + list(Mean), os.path.join(os.getcwd(), CSVPath)
 
 
 def main(ImagePath):
