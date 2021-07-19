@@ -21,7 +21,8 @@ class Scan(models.Model):
     avg_circularity = models.DecimalField(max_digits = 5, decimal_places = 2, null = True, blank = True)
     lot_no = models.CharField(max_length = 100, null = True, blank = True)
     no_of_kernels = models.IntegerField(null = True, blank = True)
-    output_csv = models.FileField(upload_to='outputs/', null=True, blank=True)
+    # output_csv = models.FileField(upload_to='outputs/', null=True, blank=True)
+    output_csv = models.CharField(null=True, blank=True, max_length=200)
 
     def __str__(self):
         return str(self.id)

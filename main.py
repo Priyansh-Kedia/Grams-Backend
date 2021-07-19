@@ -238,8 +238,8 @@ def main(ImagePath):
     # Getting grain data
     GrainData, CSVName = getData(Outlines, PixelMapping)
 
-    # return GrainData, NumberedImage, CSVName
-    return CSVName
+    return GrainData, NumberedImage, CSVName
+    #return CSVName
 
 
 if __name__ == "__main__":

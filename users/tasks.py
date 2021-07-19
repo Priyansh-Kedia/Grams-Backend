@@ -47,7 +47,7 @@ def run_ml_code(phone_number,image_url,item_type,sub_type, image_obj):
         scan = scan_serializer.save()
         scan.image = Image.objects.get(id = image_obj)
         print(csv_name)
-        scan.output_csv = File(open(csv_name, 'rb'))
+        scan.output_csv = csv_name
         scan.save()
         ml_data["image"] = image_url
         ml_data["scan_id"] = scan.scan_id
