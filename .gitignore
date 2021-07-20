@@ -13,6 +13,7 @@ __pycache__
 *.so
 .idea
 db.sqlite3
+celerybeat-schedule.dat
 # Distribution / packaging
 .Python
 env/
