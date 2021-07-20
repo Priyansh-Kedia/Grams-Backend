@@ -14,9 +14,9 @@ class AddressSerializer(serializers.ModelSerializer):
     class Meta:
         model = Address
         fields = ['address', 'city', 'country', 'state', 'profile_id', 'address_id']
-        extra_kwargs = {
-            'address_id': {'read_only': True}
-        }
+        # extra_kwargs = {
+        #     'address_id': {'read_only': True}
+        # }
  
     def first_letter_capitalized_form(self, field_value):
         if field_value is not None:
@@ -37,13 +37,12 @@ class AddressSerializer(serializers.ModelSerializer):
             city = self.first_letter_capitalized_form(self.validated_data.get("city", None)),
             state = self.first_letter_capitalized_form(self.validated_data.get("state", None)),
             country = self.first_letter_capitalized_form(self.validated_data.get("country", None)),
-            
         )
         address.save()
         return address
 
     def update(self, instance):
-        instance.address = self.first_letter_capitalized_form( (self.validated_data['address'],instance.address)[self.validated_data.get('address') is None])
+        instance.address = self.first_letter_capitalized_form((self.validated_data['address'],instance.address)[self.validated_data.get('address') is None])
         instance.city = self.first_letter_capitalized_form((self.validated_data['city'],instance.city)[self.validated_data.get('city') is None])
         instance.state = self.first_letter_capitalized_form((self.validated_data['state'],instance.state)[self.validated_data.get('state') is None])
         instance.country = self.first_letter_capitalized_form((self.validated_data['country'],instance.country)[self.validated_data.get('country') is None])
@@ -56,7 +55,7 @@ class ProfileSerializer(serializers.ModelSerializer):
     
     class Meta:
         model = Profile
-        fields = [ 'name', 'company_name', 'email_id', 'is_agreed', 'phone_number', 'designation']
+        fields = [ 'name', 'company_name', 'email_id', 'is_agreed', 'phone_number', 'designation','gst_no']
         extra_kwargs = {
             'profile_id': {'read_only': True}
         }
@@ -79,6 +78,7 @@ class ProfileSerializer(serializers.ModelSerializer):
         instance.name = self.first_letter_capitalized_form((self.validated_data['name'],instance.name)[self.validated_data.get('name') is None])
         instance.designation = self.first_letter_capitalized_form((self.validated_data['designation'],instance.designation)[self.validated_data.get('designation') is None])
         instance.email_id = self.lowercase_form((self.validated_data['email_id'],instance.email_id)[self.validated_data.get('email_id') is None])
+        instance.gst_no = (self.validated_data['gst_no'],instance.gst_no)[self.validated_data.get('gst_no') is None]
         instance.is_agreed = self.validated_data.get('is_agreed', instance.is_agreed)
         instance.save()
         return instance

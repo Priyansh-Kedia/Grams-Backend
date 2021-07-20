@@ -38,7 +38,7 @@ def get_all_types(request):
 
 @api_view(['GET'])
 def get_subtype(request):
-    id = request.GET.get("id")
+    id = request.GET.get("id", None)
     if id:
         try:
             type_obj = Type.objects.get(id = id)

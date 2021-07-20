@@ -3,7 +3,7 @@ FROM python:3.7-buster
 RUN apt-get update && apt-get install nginx vim -y --no-install-recommends
 
 RUN apt install libgl1-mesa-glx -y
-RUN apt-get install ffmpeg libsm6 libxext6 -y
+RUN apt-get install ffmpeg libsm6 libxext6 -y libpq-dev python3-dev
 
 ENV DockerHOME=/usr/src/app
 
@@ -26,4 +26,4 @@ EXPOSE 8000
 # CMD [ "python","manage.py","qcluster", "0.0.0.0:6379"]
 
 # CMD ["python", "manage.py", "runserver", "0.0.0.0:8000"]
-CMD ["/startup.sh"]
+CMD ["./startup.sh"]

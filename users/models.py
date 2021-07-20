@@ -12,6 +12,7 @@ class Profile(models.Model):
     designation = models.CharField(max_length = 100, null = True, blank = True)
     email_id = models.EmailField(null = True, blank = True)
     is_agreed = models.BooleanField(default = False, help_text = "Please Tick If you agree to the Terms and Conditions of the Contract", null = True, blank = True)
+    is_new_user = models.BooleanField(default=True, help_text="If the user is new", null=True, blank=True)
     otp = models.IntegerField(validators = [otp_regex], null = True, blank = True)
     otp_timestamp = models.DateTimeField(auto_now = True, verbose_name = "OTP Created On")
     profile_id = models.AutoField(primary_key=True, name='profile_id')
@@ -43,8 +44,8 @@ class Address(models.Model):
     state = models.CharField(max_length = 100, null = True, blank = True)
     country = models.CharField(max_length = 100, null = True, blank = True)
 
-    def __str__(self):
-        return self.address
+    # def __str__(self):
+    #     return self.address
         
     class Meta:
         verbose_name_plural = "Addresses"

@@ -12,7 +12,8 @@ __pycache__
 # C extensions
 *.so
 .idea
-
+db.sqlite3
+celerybeat-schedule.dat
 # Distribution / packaging
 .Python
 env/
@@ -123,9 +124,15 @@ media/
 
 # Output csv and image
 /Numbered.jpg
-/ContoursFound.csv
+/*.csv
 
 # Elastic Beanstalk Files
 .elasticbeanstalk/*
 !.elasticbeanstalk/*.cfg.yml
 !.elasticbeanstalk/*.global.yml
+
+
+#.env
+.env
+.env.**
+env/

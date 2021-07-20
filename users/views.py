@@ -23,9 +23,10 @@ from mock import mock
 from datetime import date, datetime, timedelta
 import requests
 from urllib.parse import unquote
-from .tasks import run_ml_code
+from .tasks import add, run_ml_code
 from trials.serializers import PlanSerializer,CurrentStatusSerializer
 from trials.models import CurrentStatus
+from decouple import config
 
 import users
 
@@ -37,7 +38,8 @@ from users import models
 def generate_otp(request):
     if request.method == "POST":
         hashValue = request.POST.get(Constants.HASH)
-        phone_number = request.POST.get(Constants.PHONE_NUMBER)         
+        phone_number = request.POST.get(Constants.PHONE_NUMBER)    
+        print(phone_number)     
         otp = utils.otp_generator()
         serializer = OTPSerializer(data = request.data)
         if not serializer.is_valid():
@@ -52,7 +54,7 @@ def generate_otp(request):
             message = Constants.GRAMS_MESSAGE+" {otp} \n {hash}".format(otp = otp, hash = hashValue)
             data = {Constants.MESSAGE:message, Constants.PROFILE:model_to_dict(user_profile), Constants.IS_VERIFIED:False}
             return Response(data, status = status.HTTP_200_OK) 
-        url = Constants.OTP_URL+ Constants.OTP_KEY+ "SMS/" + phone_number + "/" + str(otp)
+        url = Constants.OTP_URL+ config(Constants.OTP_KEY)+ "SMS/" + phone_number + "/" + str(otp)
         print(url)
         requests.post( url )
         if user_profile:
@@ -82,6 +84,14 @@ def verify_otp(request):
         if user_profile:
             if otp == str(user_profile.otp) :
                 if (timezone.now() - user_profile.otp_timestamp).seconds < 1800:
+                    if user_profile.is_new_user:
+                        current = CurrentStatus.objects.create(user = user_profile)   
+                        if not current.name:
+                            current.name = TrialResponse.TRIAL1
+                            current.end_date = datetime.now()+timedelta(Constants.FREETRIAL1_DAYS)
+                            current.save()
+                    user_profile.is_new_user = False
+                    user_profile.save()
                     data = {Constants.MESSAGE:'OTP Verified Successfully!', Constants.PROFILE:model_to_dict(user_profile), Constants.IS_VERIFIED:True}
                     return Response(data, status = status.HTTP_200_OK)
                 else:
@@ -107,7 +117,10 @@ def update_profile(request):
             current.no_of_readings += Constants.FREETRIAL2_READINGS
             current.save()
         print(current.name)
-        return Response(model_to_dict(updated_profile), status = status.HTTP_200_OK)
+        profile_dict = model_to_dict(updated_profile)
+        profile_dict["end_date"] = current.end_date
+        profile_dict["current_status_name"] = current.name
+        return Response(profile_dict, status = status.HTTP_200_OK)
 
 @api_view(['GET',])
 def retrieve_profile(request):
@@ -126,18 +139,17 @@ def retrieve_profile(request):
 @api_view(['POST',])
 def add_address(request):
     if request.method == "POST":
-        add_obj = Address(profile_id=Profile.objects.get(pk=1), address= 'TESTING')
-        print(add_obj.address)
-        add_obj.save()
         address_serializer = AddressSerializer(data = request.data)
         if not address_serializer.is_valid():
             return Response(address_serializer.errors, status = status.HTTP_422_UNPROCESSABLE_ENTITY)
-        updated_address_obj = address_serializer.create()
-        return Response(model_to_dict(updated_address_obj), status = status.HTTP_200_OK)
+        address = address_serializer.create()
+        print(model_to_dict(address))
+        return Response(model_to_dict(address), status = status.HTTP_200_OK)
 
 @api_view(['PUT',])
 def update_address(request):
     if request.method == "PUT":
+        print(request.data)
         address_serializer = AddressSerializer(data = request.data)
         if not address_serializer.is_valid():
             return Response({Constants.MESSAGE:address_serializer.errors}, status = status.HTTP_422_UNPROCESSABLE_ENTITY)
@@ -148,9 +160,14 @@ def update_address(request):
 def retrieve_address(request):
     if request.method == "GET":
         profile_id = request.GET.get(Constants.PROFILE_ID, None)
-        retrieved_addresses = Profile.getAllAddresses(profile_id)
-        retrieved_address_serializer = AddressSerializer(retrieved_addresses, many = True)
-        return Response(retrieved_address_serializer.data, status = status.HTTP_200_OK)
+        profile = Profile.objects.get(pk = profile_id)
+        try:
+            retrieved_addresses = Address.objects.get(profile_id = profile)
+            retrieved_address_serializer = AddressSerializer(retrieved_addresses)
+            print(retrieved_address_serializer.data)
+            return Response(retrieved_address_serializer.data, status = status.HTTP_200_OK)
+        except Address.DoesNotExist:
+            return Response({Constants.MESSAGE: "Does not exist"}, status= status.HTTP_400_BAD_REQUEST)
 
 
         
@@ -162,14 +179,15 @@ def health(request):
 
 @api_view(['POST',])
 @parser_classes([MultiPartParser, FormParser])
-def upload_image(request, phone_number):
+def upload_image(request, phone_number, type, sub_type):
     if request.method == 'POST':
+        # phone_number = request.POST['phone_number']
         profile = Profile.objects.get(phone_number = phone_number)
-        image_obj = Image.objects.create(image = request.FILES['image'])
-        item_type = request.POST['type']
-        sub_type = request.POST['sub_type']
-        print(image_obj.image.url)
-        run_ml_code.delay(phone_number,image_obj.image.url,item_type,sub_type)
+        image_obj = Image.objects.create(image = request.data['image'])
+        # item_type = request.POST['type']
+        # sub_type = request.POST['sub_type']
+        item_type = type
+        run_ml_code.delay(phone_number,image_obj.image.url,item_type,sub_type, image_obj.id)
         # heading_msg = "Your results will be available soon"
         # content_msg = "Your results will come soon"
         # data = {"app_id": Constants.APP_ID, "contents": {"en": content_msg}, "headings": {"en": heading_msg}, "include_external_user_ids": [phone_number] , "chrome_web_image": Constants.CHROME_WEB_IMAGE}

@@ -10,7 +10,7 @@ urlpatterns=[
     path('add_address/', views.add_address, name = 'add_address'),
     path('retrieve_address/', views.retrieve_address, name = 'retrieve_address'),
     path('retrieve_profile', views.retrieve_profile, name = 'retrieve_profile'),
-    path('upload_image/<str:phone_number>', views.upload_image),
+    path('upload_image/<str:phone_number>/<str:type>/<str:sub_type>/', views.upload_image),
     path('health/', views.health, name = 'health'),
     path('upload/', views.MyImageView.as_view()),
     path('feedback/', views.feedback, name = 'feedback'),
