@@ -52,7 +52,7 @@ openpyxl==3.0.7
 pandas==1.2.4
 paramiko==2.7.2
 pathspec==0.5.9
-Pillow==8.0.1
+Pillow==8.3.2
 prompt-toolkit==3.0.18
 psycopg2==2.8.6
 pycparser==2.20
